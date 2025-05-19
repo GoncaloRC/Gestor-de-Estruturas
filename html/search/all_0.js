@@ -1,0 +1,13 @@
+var searchData=
+[
+  ['adicionarantena_0',['adicionarantena',['../Listas__Ligadas_8c.html#a246963b52b5c809970b34b2564be592d',1,'adicionarAntena(Antena **primeiraAntena, Antena **ultimaAntena, int *numAntenas, char *frequencia, int x, int y, bool inserirNoFim):&#160;Listas_Ligadas.c'],['../Listas__Ligadas_8h.html#a246963b52b5c809970b34b2564be592d',1,'adicionarAntena(Antena **primeiraAntena, Antena **ultimaAntena, int *numAntenas, char *frequencia, int x, int y, bool inserirNoFim):&#160;Listas_Ligadas.c']]],
+  ['adicionararesta_1',['adicionararesta',['../Grafos_8c.html#a269c34be17fc50b4faccb782f25ce347',1,'adicionarAresta(Grafo *cidade, int inicio, int destino):&#160;Grafos.c'],['../Grafos_8h.html#a269c34be17fc50b4faccb782f25ce347',1,'adicionarAresta(Grafo *cidade, int inicio, int destino):&#160;Grafos.c']]],
+  ['adicionarcidade_2',['adicionarcidade',['../Grafos_8c.html#a6daf459053fbb884dfa847a1042c46f8',1,'adicionarCidade(int numAntenas):&#160;Grafos.c'],['../Grafos_8h.html#ac919352675ca526478dc4302cdda89e6',1,'adicionarCidade(int numVertices):&#160;Grafos.c']]],
+  ['adicionarnefasto_3',['adicionarnefasto',['../Listas__Ligadas_8c.html#a22e4c72f13e2ada02e3e631d1db10f5c',1,'adicionarNefasto(Nefasto **primeiroNefasto, Nefasto **ultimoNefasto, int *numNefastos, int x, int y, bool inserirNoFim):&#160;Listas_Ligadas.c'],['../Listas__Ligadas_8h.html#a22e4c72f13e2ada02e3e631d1db10f5c',1,'adicionarNefasto(Nefasto **primeiroNefasto, Nefasto **ultimoNefasto, int *numNefastos, int x, int y, bool inserirNoFim):&#160;Listas_Ligadas.c']]],
+  ['adj_4',['adj',['../structVertice.html#adfe4615d788a7fa02a1810b145451913',1,'Vertice']]],
+  ['alteraridioma_5',['alterarIdioma',['../Menu_8c.html#a95a59e6dd39aade136ef54b829b5ecca',1,'Menu.c']]],
+  ['antena_6',['antena',['../structAntena.html',1,'Antena'],['../Listas__Ligadas_8h.html#a843ab8b81393e8ebb3eb6b76e349acc2',1,'Antena:&#160;Listas_Ligadas.h']]],
+  ['antenas_7',['antenas',['../structGrafo.html#ad604180291441144256684c1e6dcbb63',1,'Grafo']]],
+  ['apresentartabela_8',['apresentartabela',['../Listas__Ligadas_8c.html#af3914e7fd9dcad34213200ae3e88804a',1,'apresentarTabela(Antena *primeiraAntena, Nefasto *primeiroNefasto, int numAntenas, int numNefastos, const char *traducoes[3]):&#160;Listas_Ligadas.c'],['../Listas__Ligadas_8h.html#af3914e7fd9dcad34213200ae3e88804a',1,'apresentarTabela(Antena *primeiraAntena, Nefasto *primeiroNefasto, int numAntenas, int numNefastos, const char *traducoes[3]):&#160;Listas_Ligadas.c']]],
+  ['aresta_9',['aresta',['../Grafos_8h.html#a4dfeea32aaaf68604a93805ab84f33e1',1,'Aresta:&#160;Grafos.h'],['../structAresta.html',1,'Aresta']]]
+];

@@ -1,0 +1,7 @@
+var searchData=
+[
+  ['calcularnefastos_0',['calcularnefastos',['../Listas__Ligadas_8c.html#a1f75950642c95591b5511058ae339745',1,'calcularNefastos(Antena *primeiraAntena, Nefasto **primeiroNefasto, int *numNefastos):&#160;Listas_Ligadas.c'],['../Listas__Ligadas_8h.html#a1f75950642c95591b5511058ae339745',1,'calcularNefastos(Antena *primeiraAntena, Nefasto **primeiroNefasto, int *numNefastos):&#160;Listas_Ligadas.c']]],
+  ['carregarantenas_1',['carregarantenas',['../Listas__Ligadas_8c.html#a964bf855ec50b0a64c7184fa334038d9',1,'carregarAntenas(Antena **primeiraAntena, int *numAntenas, const char *localizacaoFicheiro):&#160;Listas_Ligadas.c'],['../Listas__Ligadas_8h.html#a964bf855ec50b0a64c7184fa334038d9',1,'carregarAntenas(Antena **primeiraAntena, int *numAntenas, const char *localizacaoFicheiro):&#160;Listas_Ligadas.c']]],
+  ['carregarcidade_2',['carregarcidade',['../Grafos_8c.html#a92cd2e4d2c2f5e1aa85a8dc691b1aa47',1,'carregarCidade(Grafo **cidade, const char *localizacaoFicheiro):&#160;Grafos.c'],['../Grafos_8h.html#a92cd2e4d2c2f5e1aa85a8dc691b1aa47',1,'carregarCidade(Grafo **cidade, const char *localizacaoFicheiro):&#160;Grafos.c']]],
+  ['carregarnefastos_3',['carregarnefastos',['../Listas__Ligadas_8c.html#a078df83ac0f8970d8d94afddea380ff0',1,'carregarNefastos(Nefasto **primeiroNefasto, int *numNefastos, const char *localizacaoFicheiro):&#160;Listas_Ligadas.c'],['../Listas__Ligadas_8h.html#a078df83ac0f8970d8d94afddea380ff0',1,'carregarNefastos(Nefasto **primeiroNefasto, int *numNefastos, const char *localizacaoFicheiro):&#160;Listas_Ligadas.c']]]
+];
