@@ -2,13 +2,12 @@
  * @file Antenas.h
  * @author Gonçalo Carvalho (a31537@alunos.ipca.pt)
  * @brief Cabeçalho com definições e declarações para gestão de antenas e efeitos nefastos
- * @version 1.0
+ * @version 2.0
  * @date 2025-03-25
  * 
  * @copyright Copyright (c) 2025
  * 
  */
-
 #pragma once
 
 // Bibliotecas
@@ -42,7 +41,7 @@ typedef struct Nefasto
 } Nefasto;
 
 // Variáveis globais
-extern int MAX_X;
+extern const int MAX_X;
 
 // Declaração das funções
 int libertarAntenas(Antena **primeiraAntena, int *numAntenas);

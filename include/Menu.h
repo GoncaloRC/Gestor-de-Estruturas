@@ -1,3 +1,13 @@
+/**
+ * @file Antenas.h
+ * @author Gonçalo Carvalho (a31537@alunos.ipca.pt)
+ * @brief Cabeçalho com definições e declarações para o menu
+ * @version 2.0
+ * @date 2025-05-25
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #pragma once
 
 // Bibliotecas
@@ -15,7 +25,7 @@
  * encontrado na função procurarCaminhos
  *
  */
-#define MAX_CAMINHO 100
+#define MAX_CAMINHO 128
 
 /**
  * @struct TabelaIdioma

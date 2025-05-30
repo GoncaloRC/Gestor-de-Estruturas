@@ -24,3 +24,7 @@ $(OBJ_DIR):
 clean:
 	rm -f $(OBJ_FILE) $(EXE_NAME)
 	rmdir $(OBJ_DIR)
+
+# Nova target para compilar e executar
+run: $(EXE_NAME)
+	./$(EXE_NAME)

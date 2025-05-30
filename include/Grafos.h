@@ -1,3 +1,13 @@
+/**
+ * @file Antenas.h
+ * @author Gonçalo Carvalho (a31537@alunos.ipca.pt)
+ * @brief Cabeçalho com definições e declarações para as estruturas de grafos
+ * @version 2.0
+ * @date 2025-05-25
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #pragma once
 
 // Bibliotecas
@@ -7,22 +17,13 @@
 #include <stdbool.h>
 
 /**
- * @def MAX_LINHAS
- * @brief Número máximo de linhas permitido para a grelha de antenas.
+ * @def MAX_X
+ * @brief Valor máximo para coordenada X.
  *
- * Este valor define o limite de linhas da cidade
+ * Este valor define o limite de X (linhas) da cidade
  * onde estão posicionadas as antenas.
  */
-#define MAX_LINHAS 100
-
-/**
- * @def MAX_COLUNAS
- * @brief Número máximo de colunas permitido para a grelha de antenas.
- *
- * Este valor define o limite de colunas da cidade
- * onde estão posicionadas as antenas.
- */
-#define MAX_COLUNAS 100
+extern const int MAX_X;
 
 /**
  * @struct Aresta
@@ -30,12 +31,11 @@
  *
  * Cada aresta aponta para o vértice de destino e para a próxima aresta na lista de adjacência,
  * permitindo representar múltiplas conexões a partir de um vértice.
- *
  */
 typedef struct Aresta
 {
-    int destino;  /* (0, 1, 2, 3, ...) */
-    struct Aresta* prox;
+    struct Aresta *prox;
+    struct Vertice *destino;
 
 } Aresta;
 
@@ -46,7 +46,6 @@ typedef struct Aresta
  * Cada vértice contém a frequência da antena, a sua posição na grelha,
  * um indicador de visitação (útil para percursos no grafo), e a lista de arestas
  * que representam as suas ligações a outras antenas.
- *
  */
 typedef struct Vertice
 {
@@ -54,7 +53,8 @@ typedef struct Vertice
     int x;
     int y;
     bool visitada;
-    Aresta* adj;
+    Aresta *primeiraAresta;
+    struct Vertice *prox;
 
 } Vertice;
 
@@ -65,22 +65,35 @@ typedef struct Vertice
  * O grafo é composto por um conjunto de antenas (vértices) e o número total
  * de antenas presentes. É a estrutura para representar a conexão
  * entre antenas com a mesma frequência.
- *
  */
 typedef struct Grafo
 {
     int numAntenas;
-    Vertice* antenas;
+    Vertice *primeiraAntena;
 
 } Grafo;
 
 // Declaração das funções
-int libertarCidade(Grafo* cidade);
-Grafo* adicionarCidade(int numVertices);
-int adicionarAresta(Grafo* cidade, int inicio, int destino);
-int carregarCidade(Grafo** cidade, const char* localizacaoFicheiro);
-int resetVisitados(Grafo* cidade);
-int procurarProfundidade(Grafo* cidade, int antena);
-int procurarLargura(Grafo* cidade, int inicio);
-int procurarCaminhos(Grafo* cidade, int inicio, int destino, int* caminho, int tamanho);
+int libertarEstruturas(Grafo **cidade, int nivelLibertacao);
+int resetVisitados(Grafo *cidade);
+
+int carregarCidade(Grafo *cidade, const char *localizacaoFicheiro);
+int interligarAntenas(Grafo *cidade, bool FrequenciasIguais, bool FrequenciasDiferentes, bool verificarRepetidas);
+
+int adicionarCidade(Grafo **novo);
+int adicionarAntenaCidade(Grafo *cidade, char *frequencia, int x, int y);
+int adicionarAntenaCidadeCarregar(Grafo *cidade, Vertice **ultimaAntena, char frequencia, int x, int y);
+int adicionarAresta(Vertice *inicio, Vertice *destino, bool verificarRepetidas);
+
+int removerAntenaCidade(Grafo *cidade, char *frequencia, int x, int y);
+int removerAresta(Vertice *inicio, Vertice *destino);
+
+int procurarAntena(Grafo *cidade, Vertice **antena, int x, int y);
+int procurarProfundidade(Vertice *inicio);
+int procurarLargura(Vertice *inicio, int numeroAntenas);
+int procurarCaminhos(Vertice *inicio, Vertice *destino, int numeroAntenas);
+int procurarCaminhosRecursiva(Vertice *inicio, Vertice *destino, Vertice **caminho, int tamanho);
+
 int listarIntersecoes(Grafo *cidade, char frequencia1, char frequencia2);
+int listarAntenas(Grafo *cidade);
+int listarArestasAntena(Vertice *antena);

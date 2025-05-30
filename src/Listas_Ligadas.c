@@ -142,8 +142,8 @@ int adicionarAntena(Antena **primeiraAntena, Antena **ultimaAntena, int *numAnte
         }
     }
 
-    // Cria o espaço na memória para a nova antena
-    Antena *nova = (Antena*)malloc(sizeof(Antena));
+    // Cria o espaço na memória para a nova antena e popula as variáveis
+    Antena *nova = malloc(sizeof(Antena));
     (*nova).frequencia = *frequencia;
     (*nova).x = x;
     (*nova).y = y;
@@ -247,8 +247,8 @@ int adicionarNefasto(Nefasto **primeiroNefasto, Nefasto **ultimoNefasto, int *nu
         }
     }
 
-    // Cria o espaço na memória para a nova nefasto
-    Nefasto *novo = (Nefasto*)malloc(sizeof(Nefasto));
+    // Cria o espaço na memória para a nova nefasto e popula as variáveis
+    Nefasto *novo = malloc(sizeof(Nefasto));
     (*novo).x = x;
     (*novo).y = y;
     (*novo).prox = NULL;
