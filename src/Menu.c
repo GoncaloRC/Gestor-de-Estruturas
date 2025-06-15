@@ -9,17 +9,6 @@
  * 
  */
 #include "../include/Menu.h"
-#include "../include/Listas_Ligadas.h"
-#include "../include/Grafos.h"
-
-/**
- * @def MAX_X
- * @brief Valor máximo para coordenada X.
- *
- * Este valor define o limite de X (linhas) da cidade
- * onde estão posicionadas as antenas.
- */
-const int MAX_X = 4096;
 
 /**
  * @brief Limpa o ecrã do terminal de forma multi-plataforma
@@ -90,6 +79,17 @@ const char **alterarIdioma(const char *idioma)
     return alterarIdioma("EN"); // Idioma não encontrado (devolve o default EN)
 }
 
+Vertice *procurarAntenaMenu(Grafo *cidade, int x, int y)
+{
+    int erro = 0;
+    Vertice *antena = procurarAntena(cidade, x, y, &erro);
+
+    if (erro == ERRO_CIDADE_PONTEIRO_INVALIDO) printf("❌ Cidade inválida\n");
+    else if (erro == ERRO_OBJETO_NAO_EXISTE) printf("❌ Antena não existe.\n");
+
+    return antena;
+}
+
 /**
  * @brief Menu principal do sistema de gestão de antenas
  * 
@@ -116,8 +116,7 @@ void menuPrincipal(const char **traducoes)
 
  /*---- Grafos ---------------------------------------------------------------------------------------------------------------*/
 
-    Grafo *cidade = NULL;
-    adicionarCidade(&cidade);
+    Grafo *cidade = criarCidade();
 
  /*---- Menu -----------------------------------------------------------------------------------------------------------------*/
 
@@ -137,11 +136,13 @@ void menuPrincipal(const char **traducoes)
 
     do
     {
+        // Dá reset das variáveis do menu
         antena1 = NULL, antena2 = NULL;
         frequencia1 = '.', frequencia2 = '.';
         x1 = -1, x2 = -1, y1 = -1, y2 = -1;
         resultado[0] = 0, resultado[1] = 0;
 
+        // Menu principal
         puts("|--------------------------------------------------------------------------------------------------------------|");
         puts("|                                                     MENU                                                     |");
         puts("|--------------------------------------------------------------------------------------------------------------|");
@@ -155,10 +156,10 @@ void menuPrincipal(const char **traducoes)
         puts("| 7. Inserir uma ligação (aresta) nova na cidade.                                                              |");
         puts("| 8. Remover uma antena existente da cidade.                                                                   |");
         puts("| 9. Remover uma ligação (aresta) existente da cidade.                                                         |");
-        puts("| 10. Listar antenas alcançadas numa procura em profundidade.                                                  |");
-        puts("| 11. Listar antenas alcançadas numa procura em largura.                                                       |");
+        puts("| 10. Procurar antenas alcançadas numa procura em profundidade.                                                |");
+        puts("| 11. Procurar antenas alcançadas numa procura em largura.                                                     |");
         puts("| 12. Procurar caminhos possíveis entre antenas.                                                               |");
-        puts("| 13. Listar pontos de interseção entre antenas com frequências distintas.                                     |");
+        puts("| 13. Procurar pontos de interseção entre antenas com frequências distintas.                                   |");
         puts("| 14. Listar antenas da cidade.                                                                                |");
         puts("| 15. Listar arestas de uma antena da cidade.                                                                  |");
         puts("|--------------------------------------------------------------------------------------------------------------|");
@@ -168,6 +169,8 @@ void menuPrincipal(const char **traducoes)
         printf("\n> ");
         scanf ("%d", &opcaoMenu);
         getchar();
+
+        if (opcaoMenu == 404) opcaoMenu++;
 
      /*-----------------------------------------------------------------------------------------------------------------------*/
 
@@ -211,38 +214,55 @@ void menuPrincipal(const char **traducoes)
             {
                 limparEcra();
 
-                if (opcaoMenu == 7 || opcaoMenu == 9 || opcaoMenu == 12) printf("\nIntroduza a posição X da 1.ª antena (0 - %d): ", MAX_X);
-                else printf("Introduza a posição X da antena (0 - %d): ", MAX_X);
+                if (opcaoMenu == 7 || opcaoMenu == 9 || opcaoMenu == 12) printf("Introduza a posição X da 1.ª antena: ");
+                else printf("Introduza a posição X da antena: ");
                 scanf("%d", &x1);
                 getchar();
 
-                if (opcaoMenu == 7 || opcaoMenu == 9 || opcaoMenu == 12) printf("\nIntroduza a posição Y da 1.ª antena (0 - %d): ", MAX_X);
-                else printf("\nIntroduza a posição Y da antena (0 - %d): ", MAX_X);
+                if (opcaoMenu == 7 || opcaoMenu == 9 || opcaoMenu == 12) printf("\nIntroduza a posição Y da 1.ª antena: ");
+                else printf("\nIntroduza a posição Y da antena: ");
                 scanf("%d", &y1);
                 getchar();
 
-            } while (x1 > MAX_X || y1 > MAX_X || x1 < 0 || y1 < 0);
+            } while (x1 < 0 || y1 < 0);
 
-            if (opcaoMenu == 7 || opcaoMenu == 8 || opcaoMenu == 9 || opcaoMenu == 12)
+            if (opcaoMenu != 6)
+            {
+                antena1 = procurarAntenaMenu(cidade, x1, y1);
+                if (antena1 == NULL)
+                {
+                    printf("❌ Antena não existe\n");
+                    opcaoMenu = 404;
+                }
+            }
+
+            if (opcaoMenu == 7 || opcaoMenu == 9 || opcaoMenu == 12)
             {
                 do
                 {
                     limparEcra();
 
-                    printf("Introduza a posição X da 2.ª antena (0 - %d): ", MAX_X);
+                    printf("Introduza a posição X da 2.ª antena: ");
                     scanf("%d", &x2);
                     getchar();
 
-                    printf("\nIntroduza a posição Y da 2.ª antena (0 - %d): ", MAX_X);
+                    printf("\nIntroduza a posição Y da 2.ª antena: ");
                     scanf("%d", &y2);
                     getchar();
 
-                } while (x2 > MAX_X || y2 > MAX_X || x2 < 0 || y2 < 0);
+                } while (x2 < 0 || y2 < 0);
+
+                antena2 = procurarAntenaMenu(cidade, x2, y2);
+                if (antena2 == NULL)
+                {
+                    printf("❌ Antena não existe\n");
+                    opcaoMenu = 404;
+                }
             }
         }
 
         // Questiona o usuário (S ou N)
-        if ( opcaoMenu == 5 || opcaoMenu == 97 || opcaoMenu == 99)
+        if (opcaoMenu == 5)
         {
             do
             {
@@ -296,9 +316,7 @@ void menuPrincipal(const char **traducoes)
 
             case 2:
                 resultado[0] = adicionarAntena(&primeiraAntena, NULL, &numAntenas, &frequencia1, x1, y1, false);
-                if (resultado[0] == -1) printf("❌ Coordenadas inválidas (devem ser positivas).");
-                else if (resultado[0] == -2) printf("❌ Limite de X atingido (X deve ser menor igual que %d).", MAX_X);
-                else if (resultado[0] == -3) printf("❌ Já existe a antena '%c' em (%d, %d).", frequencia1, x1, y1);
+                if (resultado[0] == -2) printf("❌ Já existe a antena '%c' em (%d, %d).", frequencia1, x1, y1);
                 else
                 {
                     printf("✅ Antena '%c' em (%d, %d) adicionada.", frequencia1, x1, y1);
@@ -328,29 +346,27 @@ void menuPrincipal(const char **traducoes)
             break;
 
             case 5:
-                libertarEstruturas(&cidade, 2);
+                libertarArestas(cidade);
                 resultado[0] = carregarCidade(cidade, localizacaoFicheiro[2]);
-                if (resultado[0] == -1) printf("❌ Cidade inválida.\n");
-                else if (resultado[0] == -6) printf("❌ Não foi possível abrir o ficheiro: (%s)", localizacaoFicheiro[2]);
-                else if (resultado[0] == -404) printf("❌ Não foi possível alocar memória!");
+                if (resultado[0] == ERRO_CIDADE_PONTEIRO_INVALIDO) printf("❌ Cidade inválida.\n");
+                else if (resultado[0] == ERRO_ABRIR_FICHEIRO) printf("❌ Não foi possível abrir o ficheiro: (%s)", localizacaoFicheiro[2]);
+                else if (resultado[0] == ERRO_ALOCACAO_MEMORIA) printf("❌ Não foi possível alocar memória!");
                 else
                 {
                     puts("✅ Ficheiro carregado com sucesso.");
                     if (opcaoSN == 'S' || opcaoSN == 's')
                     {
                         resultado[1] = interligarAntenas(cidade, true, false, false);
-                        if (resultado[1] == -404) printf("❌ Não foi possível alocar memória!");
+                        if (resultado[1] == ERRO_ALOCACAO_MEMORIA) printf("❌ Não foi possível alocar memória!");
                         else printf("✅ Antenas com frequências iguais interligadas com sucesso.\n");
                     }
                 }
             break;
 
             case 6:
-                resultado[0] = adicionarAntenaCidade(cidade, &frequencia1, x1, y1);
-                if (resultado[0] == -1) printf("❌ Cidade inválida.\n");
-                else if (resultado[0] == -7) printf("❌ Já existe a antena '%c' em (%d, %d).\n", frequencia1, x1, y1);
-                else if (resultado[0] == -9) printf("❌ Coordenadas inválidas (devem ser positivas).\n");
-                else if (resultado[0] == -10) printf("❌ Limite de X atingido (X deve ser menor igual que %d).\n", MAX_X);
+                resultado[0] = adicionarAntenaOrdenada(cidade, &frequencia1, x1, y1);
+                if (resultado[0] == ERRO_CIDADE_PONTEIRO_INVALIDO) printf("❌ Cidade inválida.\n");
+                else if (resultado[0] == ERRO_OBJETO_JA_EXISTE) printf("❌ Já existe a antena '%c' em (%d, %d).\n", frequencia1, x1, y1);
                 else printf("✅ Antena '%c' em (%d, %d) adicionada.\n", frequencia1, x1, y1);
             break;
 
@@ -358,23 +374,12 @@ void menuPrincipal(const char **traducoes)
                 if (cidade != NULL && (*cidade).numAntenas == 0) printf("❌ Não existem antenas.\n");
                 else
                 {
-                    if (procurarAntena(cidade, &antena1, x1, y1) == -7)
-                    {
-                        if (procurarAntena(cidade, &antena2, x2, y2) == -7) printf("❌ Ambas as antenas não existem.\n");
-                        else printf("❌ A 1.ª antena não existe.\n");
-                        break;
-                    }
-                    else if (procurarAntena(cidade, &antena2, x2, y2) == -7)
-                    {
-                        printf("❌ A 2.ª antena não existe.\n");
-                        break;
-                    }
                     resultado[0] = adicionarAresta(antena1, antena2, true);
-                    if (resultado[0] == -2) printf("❌ Procura falhou, antena origem e destino inválidas.\n");
-                    else if (resultado[0] == -3) printf("❌ Procura falhou, antena origem inválida.\n");
-                    else if (resultado[0] == -4) printf("❌ Procura falhou, antena destino inválida.\n");
-                    else if (resultado[0] == -7) printf("❌ A aresta especificada já existe.\n");
-                    else if (resultado[0] == -404) printf("❌ Não foi possível alocar memória!\n");
+                    if (resultado[0] == ERRO_ANTENAS_INICIO_DESTINO_INVALIDAS) printf("❌ Procura falhou, antena origem e destino inválidas.\n");
+                    else if (resultado[0] == ERRO_ANTENA_INICIO_INVALIDA) printf("❌ Procura falhou, antena origem inválida.\n");
+                    else if (resultado[0] == ERRO_ANTENA_DESTINO_INVALIDA) printf("❌ Procura falhou, antena destino inválida.\n");
+                    else if (resultado[0] == ERRO_OBJETO_JA_EXISTE) printf("❌ A aresta especificada já existe.\n");
+                    else if (resultado[0] == ERRO_ALOCACAO_MEMORIA) printf("❌ Não foi possível alocar memória!\n");
                     else printf("✅ Aresta (%d, %d) -> (%d, %d) adicionada.\n", x1, y1, x2, y2);
                 }
             break;
@@ -383,12 +388,10 @@ void menuPrincipal(const char **traducoes)
                 if (cidade != NULL && (*cidade).numAntenas == 0) printf("❌ Não existem antenas.\n");
                 else
                 {
-                    resultado[0] = removerAntenaCidade(cidade, &frequencia1, x1, y1);
-                    if (resultado[0] == -1) printf("❌ Cidade inválida.\n");
-                    else if (resultado[0] == -7) printf("❌ Não existe a antena (%d, %d).\n", x1, y1);
-                    else if (resultado[0] == -9) printf("❌ Coordenadas inválidas (devem ser positivas).\n");
-                    else if (resultado[0] == -10) printf("❌ Limite de X atingido (X deve ser menor igual que %d).\n", MAX_X);
-                    else printf("✅ Antena '%c' em (%d, %d) removida.", frequencia1, x1, y1);
+                    resultado[0] = removerAntena2(cidade, &frequencia1, x1, y1);
+                    if (resultado[0] == ERRO_CIDADE_PONTEIRO_INVALIDO) printf("❌ Cidade inválida.\n");
+                    else if (resultado[0] == ERRO_OBJETO_NAO_EXISTE) printf("❌ Não existe a antena (%d, %d).\n", x1, y1);
+                    else printf("✅ Antena '%c' em (%d, %d) removida.\n", frequencia1, x1, y1);
                 }
             break;
 
@@ -396,22 +399,11 @@ void menuPrincipal(const char **traducoes)
                 if (cidade != NULL && (*cidade).numAntenas == 0) printf("❌ Não existem antenas.\n");
                 else
                 {
-                    if (procurarAntena(cidade, &antena1, x1, y1) == -7)
-                    {
-                        if (procurarAntena(cidade, &antena2, x2, y2) == -7) printf("❌ Ambas as antenas não existem.\n");
-                        else printf("❌ A 1.ª antena não existe.\n");
-                        break;
-                    }
-                    else if (procurarAntena(cidade, &antena2, x2, y2) == -7)
-                    {
-                        printf("❌ A 2.ª antena não existe.\n");
-                        break;
-                    }
                     resultado[0] = removerAresta(antena1, antena2);
-                    if (resultado[0] == -2) printf("❌ Procura falhou, antena origem e destino inválidas.\n");
-                    else if (resultado[0] == -3) printf("❌ Procura falhou, antena origem inválida.\n");
-                    else if (resultado[0] == -4) printf("❌ Procura falhou, antena destino inválida.\n");
-                    else if (resultado[0] == -7) printf("❌ A aresta especificada não existe.\n");
+                    if (resultado[0] == ERRO_ANTENAS_INICIO_DESTINO_INVALIDAS) printf("❌ Procura falhou, antena origem e destino inválidas.\n");
+                    else if (resultado[0] == ERRO_ANTENA_INICIO_INVALIDA) printf("❌ Procura falhou, antena origem inválida.\n");
+                    else if (resultado[0] == ERRO_ANTENA_DESTINO_INVALIDA) printf("❌ Procura falhou, antena destino inválida.\n");
+                    else if (resultado[0] == ERRO_OBJETO_NAO_EXISTE) printf("❌ A aresta especificada não existe.\n");
                     else printf("✅ Aresta (%d, %d) -> (%d, %d) removida.", x1, y1, x2, y2);
                 }
             break;
@@ -420,14 +412,9 @@ void menuPrincipal(const char **traducoes)
                 if (cidade != NULL && (*cidade).numAntenas == 0) printf("❌ Não existem antenas.\n");
                 else
                 {
-                    if (procurarAntena(cidade, &antena1, x1, y1) == -7)
-                    {
-                        printf("❌ A antena não existe.\n");
-                        break;
-                    }
-                    if (antena1 != NULL) printf("Procura em profundidade da antena '%c'(%d, %d):\n\n", (*antena1).frequencia, x1, y1);
+                    printf("Procura em profundidade da antena '%c'(%d, %d):\n\n", (*antena1).frequencia, x1, y1);
                     resultado[0] = procurarProfundidade(antena1);
-                    if (resultado[0] == -3) printf("❌ Procura falhou, antena inválida.\n");
+                    if (resultado[0] == ERRO_ANTENA_INICIO_INVALIDA) printf("❌ Procura falhou, antena inválida.\n");
                     resetVisitados(cidade);
                 }
             break;
@@ -436,15 +423,10 @@ void menuPrincipal(const char **traducoes)
                 if (cidade != NULL && (*cidade).numAntenas == 0) printf("❌ Não existem antenas.\n");
                 else
                 {
-                    if (procurarAntena(cidade, &antena1, x1, y1) == -7)
-                    {
-                        printf("❌ A antena não existe.\n");
-                        break;
-                    }
-                    if (antena1 != NULL) printf("Procura em largura da antena '%c'(%d, %d):\n\n", (*antena1).frequencia, x1, y1);
+                    printf("Procura em largura da antena '%c'(%d, %d):\n\n", (*antena1).frequencia, x1, y1);
                     resultado[0] = procurarLargura(antena1, (*cidade).numAntenas);
-                    if (resultado[0] == -3) printf("❌ Procura falhou, antena inválida.\n");
-                    else if (resultado[0] == -8) printf("❌ Procura falhou, ocorreu overflow da lista.\n");
+                    if (resultado[0] == ERRO_ANTENA_INICIO_INVALIDA) printf("❌ Procura falhou, antena inválida.\n");
+                    else if (resultado[0] == ERRO_OVERFLOW_LISTA) printf("❌ Procura falhou, ocorreu overflow da lista.\n");
                     resetVisitados(cidade);
                 }
             break;
@@ -453,23 +435,12 @@ void menuPrincipal(const char **traducoes)
                 if (cidade != NULL && (*cidade).numAntenas < 2) printf("❌ Não existem antenas suficientes para haver caminhos.\n");
                 else
                 {
-                    if (procurarAntena(cidade, &antena1, x1, y1) == -7)
-                    {
-                        if (procurarAntena(cidade, &antena2, x2, y2) == -7) printf("❌ Ambas as antenas não existem.\n");
-                        else printf("❌ A 1.ª antena não existe.\n");
-                        break;
-                    }
-                    else if (procurarAntena(cidade, &antena2, x2, y2) == -7)
-                    {
-                        printf("❌ A 2.ª antena não existe.\n");
-                        break;
-                    }
-                    if (antena1 != NULL && antena2 != NULL) printf("Caminhos possíveis de '%c'(%d, %d) a '%c'(%d, %d):\n\n", (*antena1).frequencia, x1, y1, (*antena2).frequencia, x2, y2);
+                    printf("Caminhos possíveis de '%c'(%d, %d) a '%c'(%d, %d):\n\n", (*antena1).frequencia, x1, y1, (*antena2).frequencia, x2, y2);
                     resultado[0] = procurarCaminhos(antena1, antena2, (*cidade).numAntenas);
                     if (resultado[0] == 0) printf("❌ Não existem caminhos.\n");
-                    else if (resultado[0] == -2) printf("❌ Procura falhou, antena origem e destino inválidas.\n");
-                    else if (resultado[0] == -3) printf("❌ Procura falhou, antena origem inválida.\n");
-                    else if (resultado[0] == -4) printf("❌ Procura falhou, antena destino inválida.\n");
+                    else if (resultado[0] == ERRO_ANTENAS_INICIO_DESTINO_INVALIDAS) printf("❌ Procura falhou, antena origem e destino inválidas.\n");
+                    else if (resultado[0] == ERRO_ANTENA_INICIO_INVALIDA) printf("❌ Procura falhou, antena origem inválida.\n");
+                    else if (resultado[0] == ERRO_ANTENA_DESTINO_INVALIDA) printf("❌ Procura falhou, antena destino inválida.\n");
                     resetVisitados(cidade);
                 }
             break;
@@ -481,8 +452,8 @@ void menuPrincipal(const char **traducoes)
                     if (cidade != NULL && frequencia1 != frequencia2) printf("Pontos de interseção entre as antenas com frequencias '%c' e '%c':\n\n", frequencia1, frequencia2);
                     resultado[0] = listarIntersecoes(cidade, frequencia1, frequencia2);
                     if (resultado[0] == 0) printf("❌ Não existem pontos de interseção.\n");
-                    else if (resultado[0] == -1) printf("❌ Procura falhou, cidade inválida.\n");
-                    else if (resultado[0] == -5) printf("❌ Procura falhou, as frequências devem ser diferentes.\n");
+                    else if (resultado[0] == ERRO_CIDADE_PONTEIRO_INVALIDO) printf("❌ Procura falhou, cidade inválida.\n");
+                    else if (resultado[0] == ERRO_FREQUENCIAS_IGUAIS) printf("❌ Procura falhou, as frequências devem ser diferentes.\n");
                 }
             break;
 
@@ -496,17 +467,12 @@ void menuPrincipal(const char **traducoes)
             break;
 
             case 15:
-                if (procurarAntena(cidade, &antena1, x1, y1) == -7)
-                    {
-                        printf("❌ A antena não existe.\n");
-                        break;
-                    }
                 if (cidade != NULL && (*cidade).numAntenas > 0)
                 {
                     printf("Lista de Arestas da antena '%c'(%d, %d):\n\n", (*antena1).frequencia, x1, y1);
                     resultado[0] = listarArestasAntena(antena1);
                     if (resultado[0] == 0) printf("❌ A antena não tem arestas.\n");
-                    else if (resultado[0] == -3) printf("❌ Antena inválida.\n");
+                    else if (resultado[0] == ERRO_ANTENA_INICIO_INVALIDA) printf("❌ Antena inválida.\n");
                 }
                 else printf("❌ Não existem antenas na cidade.\n");
             break;
@@ -514,9 +480,12 @@ void menuPrincipal(const char **traducoes)
             case 0:
                 libertarAntenas(&primeiraAntena, &numAntenas);
                 libertarNefastos(&primeiroNefasto, &numNefastos);
-                libertarEstruturas(&cidade, 3);
+                cidade = libertarCidade(cidade);
                 printf("Encerrando o programa...\n");
                 return;
+            break;
+
+            case 404:
             break;
 
             default:
@@ -526,13 +495,13 @@ void menuPrincipal(const char **traducoes)
 
      /*-----------------------------------------------------------------------------------------------------------------------*/
 
-        if (resultado[0] == -404 || resultado[1] == -404)
+        if (resultado[0] == ERRO_ALOCACAO_MEMORIA || resultado[1] == ERRO_ALOCACAO_MEMORIA)
         {
             printf("\nPressione 'Enter' para sair...");
             getchar(); // Aguarda o utilizador pressionar 'Enter'
             libertarAntenas(&primeiraAntena, &numAntenas);
             libertarNefastos(&primeiroNefasto, &numNefastos);
-            libertarEstruturas(&cidade, 3);
+            cidade = libertarCidade(cidade);
 
             limparEcra();
             printf("Encerrando o programa...\n");

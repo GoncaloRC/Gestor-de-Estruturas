@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 /**  
  * @brief Estrutura para representar uma antena  
@@ -39,9 +40,6 @@ typedef struct Nefasto
     struct Nefasto *prox;
 
 } Nefasto;
-
-// Variáveis globais
-extern const int MAX_X;
 
 // Declaração das funções
 int libertarAntenas(Antena **primeiraAntena, int *numAntenas);

@@ -17,6 +17,10 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+// Headers
+#include "../include/Listas_Ligadas.h"
+#include "../include/Grafos.h"
+
 /**
  * @def MAX_CAMINHO
  * @brief Tamanho máximo permitido para caminhos.
@@ -45,4 +49,6 @@ typedef struct
 
 // Declaração das funções
 int limparEcra();
+const char **alterarIdioma(const char *idioma);
+Vertice *procurarAntenaMenu(Grafo *cidade, int x, int y);
 void menuPrincipal(const char **traducoes);

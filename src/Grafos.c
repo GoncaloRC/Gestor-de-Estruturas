@@ -8,67 +8,171 @@
  * @copyright Copyright (c) 2025
  * 
  */
-
 #include "../include/Grafos.h"
 
 /**
- * @brief Liberta a memória alocada para as estruturas da cidade.
- *
- * Liberta os diferentes componentes da cidade com base no nível especificado:
- * - Nível 1: Liberta as arestas de cada antena.
- * - Nível 2: Liberta também as antenas.
- * - Nível 3: Liberta toda a estrutura, incluindo o grafo.
- *
- * @param cidade Ponteiro para a estrutura do grafo que representa a cidade.
- * @param nivelLibertacao Nível de libertação de memória (1, 2 ou 3).
- *
- * @return int 0 se a libertação for efetuada com sucesso.  
- * @return int -1 se o ponteiro da cidade for inválido (NULL).
+ * @brief Cria e inicializa uma nova cidade (grafo).
+ * 
+ * @note Utiliza `calloc` para garantir que todos os campos são inicializados a 0.
+ * 
+ * @return Ponteiro para a cidade alocada.
+ * @return NULL se a alocação falhar.
  */
-int libertarEstruturas(Grafo **cidade, int nivelLibertacao)
+Grafo *criarCidade()
+{
+    // Aloca o espaço na memória para a cidade (e inicializa as variáveis)
+    Grafo *novo = calloc(1, sizeof(Grafo));
+
+    return novo;
+}
+
+/**
+ * @brief Cria e inicializa uma nova antena (vértice) com os parâmetros especificados.
+ * 
+ * @param frequencia Carácter que identifica a frequência da antena (ex: 'A', 'B').
+ * @param x Coordenada horizontal da antena.
+ * @param y Coordenada vertical da antena.
+ * 
+ * @note Campos `visitada`, `primeiraAresta` e `prox` são inicializados a false/NULL.
+ * 
+ * @return Ponteiro para a antena alocada.
+ * @return NULL se a alocação falhar.
+ */
+Vertice *criarAntena(char frequencia, int x, int y)
+{
+    // Aloca o espaço na memória para a cidade (e inicializa as variáveis)
+    Vertice *novo = malloc(sizeof(Vertice));
+
+    // Verifica se foi possível alocar a memória
+    if (novo == NULL) return NULL;
+
+    // Popula as variáveis da estrutura
+    (*novo).frequencia = frequencia;
+    (*novo).x = x;
+    (*novo).y = y;
+    (*novo).visitada = false;
+    (*novo).primeiraAresta = NULL;
+    (*novo).prox = NULL;
+
+    return novo;
+}
+
+/**
+ * @brief Cria uma nova aresta que liga a um vértice de destino.
+ * 
+ * @param destino Ponteiro para o vértice de destino da aresta.
+ * 
+ * @note O campo `prox` é inicializado a NULL.
+ * 
+ * @return Ponteiro para a aresta alocada.
+ * @return NULL se a alocação falhar.
+ */
+Aresta *criarAresta(Vertice *destino)
+{
+    // Aloca o espaço na memória para a cidade (e inicializa as variáveis)
+    Aresta *novo = malloc(sizeof(Aresta));
+
+    // Verifica se foi possível alocar a memória
+    if (novo == NULL) return NULL;
+
+    // Popula as variáveis da estrutura
+    (*novo).destino = destino;
+    (*novo).prox = NULL;
+
+    return novo;
+}
+
+/**
+ * @brief Liberta toda a memória associada a uma cidade (grafo), incluindo antenas e arestas.
+ * 
+ * @param cidade Ponteiro para a cidade a libertar. Se for NULL, a função não tem efeito.
+ * 
+ * @note Esta função chama "libertarAntenas2()" para libertar todas as antenas e arestas.
+ *       O ponteiro da cidade é libertado e os campos são resetados.
+ * 
+ * @return Sempre retorna NULL, para facilitar a reatribuição do ponteiro original.
+ */
+Grafo *libertarCidade(Grafo *cidade)
 {
     // Verifica se os apontadores são válidos
-    if (cidade == NULL || *cidade == NULL) return -1; /* Return -1 caso não exista a cidade */
+    if (cidade == NULL) return NULL; /* Return NULL caso não exista a cidade */
 
-    // Liberta as antenas e arestas
-    for (Vertice *antenaAtual = (*(*cidade)).primeiraAntena; antenaAtual != NULL; )
-    {
-        if (nivelLibertacao >= 1)
-        {
-            // Liberta as arestas
-            for (Aresta *arestaAtual = (*antenaAtual).primeiraAresta; arestaAtual != NULL; )
-            {
-                Aresta *temp = arestaAtual;
-                arestaAtual = (*arestaAtual).prox;
-                free(temp);
-            }
-
-            // Limpa o ponteiro
-            (*antenaAtual).primeiraAresta = NULL;
-        }
-
-        if (nivelLibertacao >= 2)
-        {
-            // Dá reset das variáveis da cidade
-            (*(*cidade)).numAntenas = 0;
-            (*(*cidade)).primeiraAntena = NULL;
-
-            // Liberta as antenas
-            Vertice *temp = antenaAtual;
-            antenaAtual = (*antenaAtual).prox;
-            free(temp);
-        }
-        else
-        {
-            antenaAtual = (*antenaAtual).prox;
-        }
-    }
+    // Liberta as antenas (e, posteriormente, as arestas)
+    libertarAntenas2(cidade);
 
     // Liberta a cidade
-    if (nivelLibertacao >= 3)
+    free(cidade);
+
+    return NULL;
+}
+
+/**
+ * @brief Liberta todas as antenas e arestas de uma cidade, resetando a sua estrutura.
+ * 
+ * @param cidade Ponteiro para a cidade cujas antenas serão libertadas.
+ * 
+ * @note Percorre a lista de antenas, libertando cada aresta associada antes de libertar a antena.
+ *       No final, reseta o contador de antenas ("numAntenas") e o ponteiro para a primeira antena.
+ * 
+ * @return Retorna 0 em caso de sucesso
+ * @return "ERRO_CIDADE_PONTEIRO_INVALIDO" se "cidade" for NULL.
+ */
+int libertarAntenas2(Grafo *cidade)
+{
+    // Verifica se os apontadores são válidos
+    if (cidade == NULL) return ERRO_CIDADE_PONTEIRO_INVALIDO;
+
+    for (Vertice *antenaAtual = (*cidade).primeiraAntena; antenaAtual != NULL; )
     {
-        free(*cidade);
-        *cidade = NULL; /* Limpa o ponteiro */
+        // Liberta as arestas
+        for (Aresta *arestaAtual = (*antenaAtual).primeiraAresta; arestaAtual != NULL; )
+        {
+            Aresta *temp = arestaAtual;
+            arestaAtual = (*arestaAtual).prox;
+            free(temp);
+        }
+
+        // Liberta as antenas
+        Vertice *temp = antenaAtual;
+        antenaAtual = (*antenaAtual).prox;
+        free(temp);
+    }
+
+    // Dá reset das variáveis da cidade
+    (*cidade).numAntenas = 0;
+    (*cidade).primeiraAntena = NULL;
+
+    return 0;
+}
+
+/**
+ * @brief Liberta todas as arestas das antenas de uma cidade, mas mantém as antenas intactas.
+ * 
+ * @param cidade Ponteiro para a cidade cujas arestas serão libertadas.
+ * 
+ * @note Percorre todas as antenas, libertando as suas arestas e definindo `primeiraAresta` como NULL.
+ *       As antenas não são libertadas, apenas as suas ligações (arestas).
+ * 
+ * @return Retorna 0 em caso de sucesso
+ * @return "ERRO_CIDADE_PONTEIRO_INVALIDO" se "cidade" for NULL.
+ */
+int libertarArestas(Grafo *cidade)
+{
+    // Verifica se os apontadores são válidos
+    if (cidade == NULL) return ERRO_CIDADE_PONTEIRO_INVALIDO;
+
+    for (Vertice *antenaAtual = (*cidade).primeiraAntena; antenaAtual != NULL; antenaAtual = (*antenaAtual).prox)
+    {
+        // Liberta as arestas
+        for (Aresta *arestaAtual = (*antenaAtual).primeiraAresta; arestaAtual != NULL; )
+        {
+            Aresta *temp = arestaAtual;
+            arestaAtual = (*arestaAtual).prox;
+            free(temp);
+        }
+
+        // Limpa o ponteiro
+        (*antenaAtual).primeiraAresta = NULL;
     }
 
     return 0;
@@ -83,12 +187,12 @@ int libertarEstruturas(Grafo **cidade, int nivelLibertacao)
  * @param cidade Ponteiro para a estrutura do grafo que representa a cidade.
  *
  * @return int 0 se a operação for concluída com sucesso.  
- * @return int -1 se o ponteiro da cidade for inválido (NULL).
+ * @return int ERRO_CIDADE_PONTEIRO_INVALIDO se o ponteiro da cidade for inválido (NULL).
  */
 int resetVisitados(Grafo *cidade)
 {
     // Verifica se o apontador é válido
-    if (cidade == NULL) return -1; /* Return -1 caso não exista a cidade */
+    if (cidade == NULL) return ERRO_CIDADE_PONTEIRO_INVALIDO;
 
     // Dá reset da flag "visitada" das antenas
     for (Vertice *antenaAtual = (*cidade).primeiraAntena; antenaAtual != NULL; antenaAtual = (*antenaAtual).prox)
@@ -109,40 +213,52 @@ int resetVisitados(Grafo *cidade)
  * @param localizacaoFicheiro Caminho para o ficheiro de entrada.
  *
  * @return int 0 se a cidade for carregada com sucesso.  
- * @return int -1 se o ponteiro da cidade for inválido (NULL).  
- * @return int -6 se o ficheiro não puder ser aberto.  
+ * @return int ERRO_CIDADE_PONTEIRO_INVALIDO se o ponteiro da cidade for inválido (NULL).  
+ * @return int ERRO_ABRIR_FICHEIRO se o ficheiro não puder ser aberto.  
  * @return int -404 se ocorrer um erro de alocação de memória ao adicionar uma antena.
  */
 int carregarCidade(Grafo *cidade, const char *localizacaoFicheiro)
 {
     // Verifica se o apontador é válido
-    if (cidade == NULL) return -1; /* Return -1 caso não exista a cidade */
+    if (cidade == NULL) return ERRO_CIDADE_PONTEIRO_INVALIDO;
 
     // Abre o ficheiro para leitura
     FILE *ficheiro = fopen(localizacaoFicheiro, "r");
 
     // Verifica se foi possível abrir o ficheiro
-    if (ficheiro == NULL) return -6; /* Retorna -6 caso não seja possível abrir o ficheiro */
+    if (ficheiro == NULL) return ERRO_ABRIR_FICHEIRO;
 
-    // Verifica a existência de antenas
+    // Variaveis de otimização e retorno de erro
     Vertice *ultimaAntena = NULL;
-    char linha[MAX_X]; /* Máximo tamanho da linha para leitura */
+    int erro;
 
-    for (int y = 0; fgets(linha, sizeof(linha), ficheiro); y++)
+    // Variáveis necessárias para leitura (getline)
+    char *linha = NULL;
+    size_t tamanho = 0;
+    ssize_t lidos;
+
+    // Percorre o ficheiro e verifica a existência de antenas
+    for (int y = 0; (lidos = getline(&linha, &tamanho, ficheiro)) != -1; y++)
     {
         for (int x = 0; linha[x] != '\n' && linha[x] != '\0'; x++)
         {
-            if ((linha[x] >= 'A' && linha[x] <= 'Z'))
+            if (linha[x] >= 'A' && linha[x] <= 'Z')
             {
-                // Adiciona a nova antena
-                if (adicionarAntenaCidadeCarregar(cidade, &ultimaAntena, linha[x], x, y) == -404)
+                // Cria a nova antena e atualiza a última antena
+                ultimaAntena = adicionarAntenaFim(cidade, ultimaAntena, linha[x], x, y, &erro);
+
+                // Verifica se foi possível alocar a memória
+                if (ultimaAntena == NULL)
                 {
-                    return -404; /* Return -404 caso não tenha sido possível alocar memória */
+                    free(linha);
+                    fclose(ficheiro);
+                    return erro;
                 }
             }
         }
     }
 
+    free(linha);
     fclose(ficheiro); /* Fecha o ficheiro */
 
     return 0;
@@ -162,13 +278,13 @@ int carregarCidade(Grafo *cidade, const char *localizacaoFicheiro)
  * @param verificarRepetidas Se verdadeiro, verifica se já existe ligação antes de adicionar.
  *
  * @return int 0 se as interligações forem feitas com sucesso.  
- * @return int -1 se o ponteiro da cidade for inválido (NULL).  
+ * @return int ERRO_CIDADE_PONTEIRO_INVALIDO se o ponteiro da cidade for inválido (NULL).  
  * @return int -404 se ocorrer um erro de alocação de memória ao adicionar uma aresta.
  */
 int interligarAntenas(Grafo *cidade, bool FrequenciasIguais, bool FrequenciasDiferentes, bool verificarRepetidas)
 {
     // Verifica se o apontador é válido
-    if (cidade == NULL) return -1; /* Return -1 caso não exista a cidade */
+    if (cidade == NULL) return ERRO_CIDADE_PONTEIRO_INVALIDO;
 
     // Cria arestas entre antenas com a mesma frequência, diferentes ou ambos
     for (Vertice *antenaAtual1 = (*cidade).primeiraAntena; antenaAtual1 != NULL; antenaAtual1 = (*antenaAtual1).prox)
@@ -178,35 +294,11 @@ int interligarAntenas(Grafo *cidade, bool FrequenciasIguais, bool FrequenciasDif
             if ((FrequenciasIguais && (*antenaAtual1).frequencia == (*antenaAtual2).frequencia)
               || (FrequenciasDiferentes && (*antenaAtual1).frequencia != (*antenaAtual2).frequencia))
             {
-                if (adicionarAresta(antenaAtual1, antenaAtual2, verificarRepetidas) == -404) return -404; /* Return -404 caso não tenha sido possível alocar memória */
-                if (adicionarAresta(antenaAtual2, antenaAtual1, verificarRepetidas) == -404) return -404; /* Return -404 caso não tenha sido possível alocar memória */
+                if (adicionarAresta(antenaAtual1, antenaAtual2, verificarRepetidas) == -404) return ERRO_ALOCACAO_MEMORIA;
+                if (adicionarAresta(antenaAtual2, antenaAtual1, verificarRepetidas) == -404) return ERRO_ALOCACAO_MEMORIA;
             }
         }
     }
-
-    return 0;
-}
-
-/**
- * @brief Cria e inicializa uma nova cidade (grafo).
- *
- * Aloca memória para a estrutura do grafo e inicializa o número de antenas a zero.
- *
- * @param novo Ponteiro duplo onde será armazenado o novo grafo criado.
- *
- * @return int 0 se a cidade for criada com sucesso.  
- * @return int -404 se ocorrer um erro de alocação de memória.
- */
-int adicionarCidade(Grafo **novo)
-{
-    // Aloca o espaço na memória para a cidade
-    *novo = malloc(sizeof(Grafo));
-
-    // Verifica se foi possível alocar a memória
-    if (*novo == NULL) return -404; /* Return -404 caso não tenha sido possível alocar memória */
-
-    // Popula as variáveis
-    (*(*novo)).numAntenas = 0;
 
     return 0;
 }
@@ -223,86 +315,63 @@ int adicionarCidade(Grafo **novo)
  * @param y Coordenada Y da nova antena.
  *
  * @return int 0 se a antena for adicionada com sucesso.  
- * @return int -1 se o ponteiro da cidade for inválido (NULL).  
- * @return int -7 se já existir uma antena nessa posição.  
- * @return int -9 se as coordenadas forem negativas.  
- * @return int -10 se a coordenada X exceder o máximo permitido.  
+ * @return int ERRO_CIDADE_PONTEIRO_INVALIDO se o ponteiro da cidade for inválido (NULL).  
+ * @return int ERRO_OBJETO_JA_EXISTE se já existir uma antena nessa posição.
  * @return int -404 se ocorrer um erro de alocação de memória.
  */
-int adicionarAntenaCidade(Grafo *cidade, char *frequencia, int x, int y)
+int adicionarAntenaOrdenada(Grafo *cidade, char *frequencia, int x, int y)
 {
     // Verifica se o apontador é válido
-    if (cidade == NULL) return -1; /* Return -1 caso não exista a cidade */
+    if (cidade == NULL) return ERRO_CIDADE_PONTEIRO_INVALIDO;
 
-    // Filtra coordenadas negativas
-    if (x < 0 || y < 0) return -9; /* Retorna -9 em caso de serem coordenadas negativas */
-
-    // Filtra coordenadas de x acima do permitido
-    if (x > MAX_X) return -10; /* Retorna -10 em caso de ultrapassar o máximo de leitura de X */
-
-    // Verifica a posição da nova antena na lista (e se esta é repetida)
-    int posicaoNaLista = 0; /* Mais otimizado do que libertar a memória em caso de return -3, mas mais complexo! */
-
-    Vertice *anterior;
+    // Cria os apontadores para navegar a lista ligada
+    Vertice *anterior = NULL;
     Vertice *posterior = (*cidade).primeiraAntena;
 
-    if (posterior == NULL)
+    // Insere no início da lista
+    if (posterior == NULL || (y < (*posterior).y) || (x <= (*posterior).x && y == (*posterior).y))
     {
-        posicaoNaLista = 1; /* Insere no início e fim (não existem antenas na lista) */
-    }
-    else if ((y < (*(*cidade).primeiraAntena).y) || (x <= (*(*cidade).primeiraAntena).x && y == (*(*cidade).primeiraAntena).y))
-    {
-        if (x == (*(*cidade).primeiraAntena).x && y == (*(*cidade).primeiraAntena).y)
+        // Verifica se a antena é repetida
+        if (x == (*posterior).x && y == (*posterior).y)
         {
-            *frequencia = (*(*cidade).primeiraAntena).frequencia; /* Guarda a frequência da antena ocupada */
-            return -7; /* Retorna -7 em caso de já existir essa antena */
+            *frequencia = (*posterior).frequencia; /* Guarda a frequência da antena ocupada */
+            return ERRO_OBJETO_JA_EXISTE;
         }
-        else
-        {
-            posicaoNaLista = 2; /* Insere no início */
-        }
+
+        // Cria a nova antena e popula as variáveis da estrutura
+        Vertice *nova = criarAntena(*frequencia, x, y);
+
+        // Verifica se foi possível alocar a memória
+        if (nova == NULL) return ERRO_ALOCACAO_MEMORIA;
+
+        // Insere a antena na posição correspondente da lista
+        (*nova).prox = (*cidade).primeiraAntena;
+        (*cidade).primeiraAntena = nova;
     }
+    // Insere no meio e fim da lista
     else
     {
-        while (posterior != NULL && ((y > (*posterior).y) || (x >= (*posterior).x && y == (*posterior).y)))
+        while (posterior != NULL && ((y > (*posterior).y) || (x > (*posterior).x && y == (*posterior).y)))
         {
             anterior = posterior;
             posterior = (*posterior).prox;
         }
 
-        if (x == (*anterior).x && y == (*anterior).y)
+        if (posterior != NULL && x == (*posterior).x && y == (*posterior).y)
         {
-            *frequencia = (*anterior).frequencia; /* Guarda a frequência da antena ocupada */
-            return -7; /* Retorna -7 em caso de já existir essa antena */
+            *frequencia = (*posterior).frequencia; /* Guarda a frequência da antena ocupada */
+            return ERRO_OBJETO_JA_EXISTE;
         }
-    }
 
-    // Cria o espaço na memória para a nova antena
-    Vertice *nova = malloc(sizeof(Vertice));
+        // Aloca o espaço na memória para a nova antena
+        Vertice *nova = criarAntena(*frequencia, x, y);
 
-    // Verifica se foi possível alocar a memória
-    if (nova == NULL) return -404; /* Return -404 caso não tenha sido possível alocar memória */
+        // Verifica se foi possível alocar a memória
+        if (nova == NULL) return ERRO_ALOCACAO_MEMORIA;
 
-    // Popula as variáveis da estrutura
-    (*nova).frequencia = *frequencia;
-    (*nova).x = x;
-    (*nova).y = y;
-    (*nova).prox = NULL;
-
-    // Insere a antena na posição correspondente
-    if (posicaoNaLista == 0)
-    {
+        // Insere a antena na posição correspondente da lista
         (*anterior).prox = nova;
         (*nova).prox = posterior;
-    }
-    if (posicaoNaLista == 1)
-    {
-        (*cidade).primeiraAntena = nova;
-    }
-    if (posicaoNaLista == 2)
-    {
-        (*nova).prox = (*cidade).primeiraAntena;
-        (*cidade).primeiraAntena = nova;
     }
 
     (*cidade).numAntenas++;
@@ -311,49 +380,59 @@ int adicionarAntenaCidade(Grafo *cidade, char *frequencia, int x, int y)
 }
 
 /**
- * @brief Adiciona uma antena à cidade durante o carregamento a partir de ficheiro.
- *
- * Cria uma nova antena com os dados fornecidos e adiciona-a ao final da lista ligada.
- *
- * @param cidade Ponteiro para a estrutura do grafo da cidade.
- * @param ultimaAntena Ponteiro para o ponteiro da última antena adicionada.
- * @param frequencia Frequência da antena.
- * @param x Coordenada X da antena.
- * @param y Coordenada Y da antena.
- *
- * @return int 0 se a antena for adicionada com sucesso.  
- * @return int -404 se ocorrer um erro de alocação de memória.
+ * @brief Adiciona uma nova antena no fim da lista ligada do grafo.
+ * 
+ * @param cidade Ponteiro para a estrutura do grafo onde a antena será inserida.
+ * @param ultimaAntena Ponteiro para a última antena da lista (pode ser NULL se a lista estiver vazia).
+ * @param frequencia Carácter que identifica a frequência da antena (ex: 'A', 'B').
+ * @param x Coordenada horizontal da antena.
+ * @param y Coordenada vertical da antena.
+ * @param erro Ponteiro para inteiro onde será armazenado o código de erro, caso ocorra.
+ * 
+ * @note Esta função:
+ *       - Verifica a validade dos parâmetros de entrada.
+ *       - Aloca memória para a nova antena.
+ *       - Atualiza a lista ligada e o contador de antenas.
+ *       - Atribui códigos de erro específicos em caso de falha.
+ * 
+ * @return ponteiro para a nova antena em caso de sucesso.
+ * @return NULL em caso de erro, e o código de erro é armazenado em "*erro".
  */
-int adicionarAntenaCidadeCarregar(Grafo *cidade, Vertice **ultimaAntena, char frequencia, int x, int y)
+Vertice *adicionarAntenaFim(Grafo *cidade, Vertice *ultimaAntena, char frequencia, int x, int y, int *erro)
 {
+    // Verifica se o apontador é válido
+    if (cidade == NULL)
+    {
+        *erro = ERRO_CIDADE_PONTEIRO_INVALIDO;
+        return NULL;
+    }
+
     // Cria o espaço na memória para a nova antena
-    Vertice *nova = malloc(sizeof(Vertice));
+    Vertice *nova = criarAntena(frequencia, x, y);
 
     // Verifica se foi possível alocar a memória
-    if (nova == NULL) return -404; /* Return -404 caso não tenha sido possível alocar memória */
-
-    // Popula as variáveis da estrutura
-    (*nova).frequencia = frequencia;
-    (*nova).x = x;
-    (*nova).y = y;
-    (*nova).prox = NULL;
+    if (nova == NULL)
+    {
+        *erro = ERRO_ALOCACAO_MEMORIA;
+        return NULL;
+    }
 
     // Adiciona na posição correta da lista
     if ((*cidade).primeiraAntena == NULL)
     {
         (*cidade).primeiraAntena = nova;
-        *ultimaAntena = nova;
+        ultimaAntena = nova;
     }
     else
     {
-        (*(*ultimaAntena)).prox = nova;
-        *ultimaAntena = nova;
+        (*ultimaAntena).prox = nova;
+        ultimaAntena = nova;
     }
 
     // Incrementa o número de antenas
     (*cidade).numAntenas++;
 
-    return 0;
+    return nova;
 }
 
 /**
@@ -363,18 +442,21 @@ int adicionarAntenaCidadeCarregar(Grafo *cidade, Vertice **ultimaAntena, char fr
  * @param destino Apontador para a antena de destino.
  * @param verificarRepetidas Booleano que indica se deve verificar arestas repetidas.
  * @return int 0 se for bem-sucedido, ou código de erro:
- * @return int -2 se os vértices forem iguais,
- * @return int -3 se o vértice de início for inválido,
- * @return int -4 se o vértice de destino for inválido,
- * @return int -7 se a aresta já existir (quando verificarRepetidas for verdadeiro),
+ * @return int ERRO_ANTENAS_INICIO_DESTINO_INVALIDAS se os vértices forem inválidos,
+ * @return int ERRO_ANTENA_INICIO_INVALIDA se o vértice de início for inválido,
+ * @return int ERRO_ANTENA_DESTINO_INVALIDA se o vértice de destino for inválido,
+ * @return int ERRO_OBJETO_JA_EXISTE se a aresta já existir (quando verificarRepetidas for verdadeiro),
  * @return int -404 se não for possível alocar memória.
  */
 int adicionarAresta(Vertice *inicio, Vertice *destino, bool verificarRepetidas)
 {
     // Verifica se as antenas de início e destino são válidas
-    if (inicio == destino) return -2; /* Retorna -2 caso sejam ambas inválidas */
-    else if (inicio == NULL) return -3; /* Retorna -3 caso o início seja inválido */
-    else if (destino == NULL) return -4; /* Retorna -4 caso o destino seja inválido */
+    if (inicio == NULL)
+    {
+        if (destino == NULL) return ERRO_ANTENAS_INICIO_DESTINO_INVALIDAS;
+        else return ERRO_ANTENA_INICIO_INVALIDA;
+    }
+    else if (destino == NULL) return ERRO_ANTENA_DESTINO_INVALIDA;
 
     // Verifica se já existe a aresta (se verificarRepetidas for true)
     if (verificarRepetidas)
@@ -383,19 +465,16 @@ int adicionarAresta(Vertice *inicio, Vertice *destino, bool verificarRepetidas)
         {
             if ((*arestaAtual).destino == destino)
             {
-                return -7; /* Return -7 caso já exista a aresta */
+                return ERRO_OBJETO_JA_EXISTE;
             }
         }
     }
 
-    // Aloca o espaço na memória para a nova aresta
-    Aresta *nova = malloc(sizeof(Aresta));
+    // Cria a nova aresta
+    Aresta *nova = criarAresta(destino);
 
     // Verifica se foi possível alocar a memória
-    if (nova == NULL) return -404; /* Return -404 caso não tenha sido possível alocar memória */
-
-    // Atribui o destino
-    (*nova).destino = destino;
+    if (nova == NULL) return ERRO_ALOCACAO_MEMORIA;
 
     // Nova aresta é introduzida no início da lista ligada
     (*nova).prox = (*inicio).primeiraAresta;
@@ -411,56 +490,48 @@ int adicionarAresta(Vertice *inicio, Vertice *destino, bool verificarRepetidas)
  * @param frequencia Apontador para guardar a frequência da antena removida.
  * @param x Coordenada X da antena.
  * @param y Coordenada Y da antena.
- * @return int 0 se for bem-sucedido, ou código de erro:
- * @return int -1 se o grafo for inválido,
- * @return int -9 se as coordenadas forem negativas,
- * @return int -10 se a coordenada X exceder o limite,
- * @return int -7 se a antena não for encontrada.
+ * @return int 0 se for bem-sucedido.
+ * @return int ERRO_CIDADE_PONTEIRO_INVALIDO se o grafo for inválido.
+ * @return int ERRO_OBJETO_NAO_EXISTE se a antena não for encontrada.
  */
-int removerAntenaCidade(Grafo *cidade, char *frequencia, int x, int y)
+int removerAntena2(Grafo *cidade, char *frequencia, int x, int y)
 {
     // Verifica se o apontador é válido
-    if (cidade == NULL) return -1; /* Return -1 caso não exista a cidade */
+    if (cidade == NULL) return ERRO_CIDADE_PONTEIRO_INVALIDO;
 
-    // Filtra coordenadas negativas
-    if (x < 0 || y < 0) return -9; /* Retorna -9 em caso de serem coordenadas negativas */
+    Vertice *antenaAnterior = NULL;
+    Vertice *antenaAtual = (*cidade).primeiraAntena;
 
-    // Filtra coordenadas de x acima do permitido
-    if (x > MAX_X) return -10; /* Retorna -10 em caso de ultrapassar o máximo de leitura de X */
-
-    Vertice *anterior = (*cidade).primeiraAntena;
-    Vertice *atual = NULL;
-
-    while (atual != NULL)
+    while (antenaAtual != NULL && y >= (*antenaAtual).y)
     {
         // Verifica se a antena atual é a que queremos remover
-        if ((*atual).x == x && (*atual).y == y)
+        if ((*antenaAtual).x == x && (*antenaAtual).y == y)
         {
-            *frequencia = (*atual).frequencia; /* Guarda a frequência da antena removida */
+            *frequencia = (*antenaAtual).frequencia; /* Guarda a frequência da antena removida */
 
             // Verifica a posição da antena (início ou meio/fim)
-            if (anterior == NULL)
+            if (antenaAnterior == NULL)
             {
-                (*cidade).primeiraAntena = (*atual).prox;
+                (*cidade).primeiraAntena = (*antenaAtual).prox;
             }
             else
             {
-                (*anterior).prox = (*atual).prox;
+                (*antenaAnterior).prox = (*antenaAtual).prox;
             }
 
             (*cidade).numAntenas--;
 
             // Liberta a memória
-            free(atual);
+            free(antenaAtual);
 
             return 0;
         }
 
-        anterior = atual;
-        atual = (*atual).prox;
+        antenaAnterior = antenaAtual;
+        antenaAtual = (*antenaAtual).prox;
     }
 
-    return -7; /* Retorna -7 caso não tenha encontrado a antena */
+    return ERRO_OBJETO_NAO_EXISTE;
 }
 
 /**
@@ -469,95 +540,157 @@ int removerAntenaCidade(Grafo *cidade, char *frequencia, int x, int y)
  * @param inicio Apontador para a antena de origem.
  * @param destino Apontador para a antena de destino.
  * @return int 0 se for bem-sucedido, ou código de erro:
- * @return int -2 se os vértices forem iguais,
- * @return int -3 se o vértice de início for inválido,
- * @return int -4 se o vértice de destino for inválido,
- * @return int -7 se a aresta não existir.
+ * @return int ERRO_ANTENAS_INICIO_DESTINO_INVALIDAS se os vértices forem iguais,
+ * @return int ERRO_ANTENA_INICIO_INVALIDA se o vértice de início for inválido,
+ * @return int ERRO_ANTENA_DESTINO_INVALIDA se o vértice de destino for inválido,
+ * @return int ERRO_OBJETO_NAO_EXISTE se a aresta não existir.
  */
 int removerAresta(Vertice *inicio, Vertice *destino)
 {
     // Verifica se as antenas de início e destino são válidas
-    if (inicio == destino) return -2; /* Retorna -2 caso sejam ambas inválidas */
-    else if (inicio == NULL) return -3; /* Retorna -3 caso o início seja inválido */
-    else if (destino == NULL) return -4; /* Retorna -4 caso o destino seja inválido */
+    if (inicio == NULL)
+    {
+        if (destino == NULL) return ERRO_ANTENAS_INICIO_DESTINO_INVALIDAS;
+        else return ERRO_ANTENA_INICIO_INVALIDA;
+    }
+    else if (destino == NULL) return ERRO_ANTENA_DESTINO_INVALIDA;
 
     Aresta *anterior = NULL;
     Aresta *atual = (*inicio).primeiraAresta;
 
-    while (atual != NULL)
+    if ((*atual).destino == destino)
     {
-        // Verifica se a aresta atual é a que queremos remover
-        if ((*atual).destino == destino)
-        {
-            // Verifica a posição da aresta (início ou meio/fim)
-            if (anterior == NULL)
-            {
-                (*inicio).primeiraAresta = (*atual).prox;
-            }
-            else
-            {
-                (*anterior).prox = (*atual).prox;
-            }
-
-            // Liberta a memória
-            free(atual);
-
-            return 0;
-        }
-
+        (*inicio).primeiraAresta = (*atual).prox;
+        return 0;
+    }
+    else
+    {
         anterior = atual;
         atual = (*atual).prox;
+
+        while (atual != NULL)
+        {
+            // Verifica se a aresta atual é a que queremos remover
+            if ((*atual).destino == destino)
+            {
+                // Verifica a posição da aresta (início ou meio/fim)
+                (*anterior).prox = (*atual).prox;
+
+                // Liberta a memória
+                free(atual);
+
+                return 0;
+            }
+
+            anterior = atual;
+            atual = (*atual).prox;
+        }
     }
 
-    return -7; /* Retorna -7 caso não tenha encontrado a aresta */
+    return ERRO_OBJETO_NAO_EXISTE;
 }
 
 /**
- * @brief Procura uma antena numa determinada posição.
+ * @brief Procura uma antena no grafo com base nas coordenadas (x,y).
  * 
- * @param cidade Apontador para o grafo da cidade.
- * @param antena Apontador onde será guardado o endereço da antena encontrada.
- * @param x Coordenada X da antena.
- * @param y Coordenada Y da antena.
- * @return int 0 se for bem-sucedido.
- * @return int -1 se o grafo for inválido.
- * @return int -9 se as coordenadas forem negativas.
- * @return int -10 se a coordenada X exceder o limite.
- * @return int -7 se a antena não for encontrada.
+ * @param cidade Ponteiro para a estrutura do grafo onde será realizada a pesquisa.
+ * @param x Coordenada horizontal da antena.
+ * @param y Coordenada vertical da antena (deve ser não-negativa).
+ * @param erro Ponteiro para variável que armazenará o código de erro, caso ocorra.
+ * 
+ * @note A função assume que as antenas estão ordenadas por coordenada y decrescente,
+ *       permitindo otimizar a busca. Caso y seja menor que a coordenada y da antena atual,
+ *       a pesquisa é interrompida antecipadamente.
+ * 
+ * @note Códigos de erro possíveis:
+ *       - ERRO_CIDADE_PONTEIRO_INVALIDO se cidade for NULL
+ *       - ERRO_OBJETO_NAO_EXISTE se a antena não for encontrada
+ * 
+ * @return ponteiro para a antena encontrada.
+ * @return NULL se não for encontrada ou ocorrer erro, o código de erro é armazenado no parâmetro "*erro"
  */
-int procurarAntena(Grafo *cidade, Vertice **antena, int x, int y)
+Vertice *procurarAntena(Grafo *cidade, int x, int y, int *erro)
 {
     // Verifica se o apontador é válido
-    if (cidade == NULL) return -1; /* Return NULL caso não exista a cidade */
+    if (cidade == NULL)
+    {
+        *erro = ERRO_CIDADE_PONTEIRO_INVALIDO;
+        return NULL;
+    }
 
-    // Filtra coordenadas negativas
-    if (x < 0 || y < 0) return -9; /* Retorna -9 em caso de serem coordenadas negativas */
-
-    // Filtra coordenadas de x acima do permitido
-    if (x > MAX_X) return -10; /* Retorna -10 em caso de ultrapassar o máximo de leitura de X */
-
-    for (Vertice *antenaAtual = (*cidade).primeiraAntena; antenaAtual != NULL; antenaAtual = (*antenaAtual).prox)
+    for (Vertice *antenaAtual = (*cidade).primeiraAntena; antenaAtual != NULL && y >= (*antenaAtual).y; antenaAtual = (*antenaAtual).prox)
     {
         if (x == (*antenaAtual).x && y == (*antenaAtual).y)
         {
-            *antena = antenaAtual;
-            return 0;
+            return antenaAtual;
         }
     }
 
-    return -7; /* Retorna -7 caso não tenha encontrado a antena */
+    *erro = ERRO_OBJETO_NAO_EXISTE;
+    return NULL;
+}
+
+/**
+ * @brief Procura uma aresta entre duas antenas (vértices) no grafo.
+ * 
+ * @param inicio Ponteiro para o vértice de origem da aresta.
+ * @param destino Ponteiro para o vértice de destino da aresta.
+ * @param erro Ponteiro para armazenar o código de erro em caso de falha.
+ * 
+ * @note A função:
+ *       - Verifica a validade dos vértices de início e destino
+ *       - Atribui códigos de erro específicos para cada caso de vértice inválido
+ *       - Percorre a lista de arestas do vértice de início
+ *       - Compara cada destino de aresta com o vértice destino fornecido
+ * 
+ * @note Códigos de erro possíveis:
+ *       - ERRO_ANTENAS_INICIO_DESTINO_INVALIDAS se ambos vértices forem NULL
+ *       - ERRO_ANTENA_INICIO_INVALIDA se apenas o vértice de início for NULL
+ *       - ERRO_ANTENA_DESTINO_INVALIDA se apenas o vértice de destino for NULL
+ *       - ERRO_OBJETO_NAO_EXISTE se a aresta não for encontrada
+ * 
+ * @return o ponteiro para a aresta encontrada.
+ * @return NULL se a aresta não existir ou em caso de erro, armazenando o código de erro no parâmetro "*erro".
+ */
+Aresta *procurarAresta(Vertice *inicio, Vertice *destino, int *erro)
+{
+    // Verifica se as antenas de início e destino são válidas
+    if (inicio == NULL)
+    {
+        if (destino == NULL) *erro = ERRO_ANTENAS_INICIO_DESTINO_INVALIDAS;
+        else *erro = ERRO_ANTENA_INICIO_INVALIDA;
+        return NULL;
+    }
+    else if (destino == NULL)
+    {
+        *erro = ERRO_ANTENA_DESTINO_INVALIDA;
+        return NULL;
+    }
+
+    // Percorre as arestas e verifica se existe a aresta especificada
+    for (Aresta *arestaAtual = (*inicio).primeiraAresta; arestaAtual != NULL; arestaAtual = (*arestaAtual).prox)
+    {
+        if ((*arestaAtual).destino == destino)
+        {
+            return arestaAtual;
+        }
+    }
+
+    *erro = ERRO_OBJETO_NAO_EXISTE;
+    return NULL; /* Retorna NULL caso não tenha encontrado a aresta */
 }
 
 /**
  * @brief Realiza uma procura em profundidade (DFS) a partir de uma antena.
  * 
  * @param inicio Apontador para a antena de partida.
+ * 
  * @return int 0 se for bem-sucedido, ou -3 se a antena de início for inválida.
  */
 int procurarProfundidade(Vertice *inicio)
 {
     // Verifica se a antena início é válida
-    if (inicio == NULL) return -3; /* Return -3 caso não seja válida a antena início */
+    if (inicio == NULL) return ERRO_ANTENA_INICIO_INVALIDA;
 
     // Marca como visitada e imprime
     (*inicio).visitada = true;
@@ -580,14 +713,15 @@ int procurarProfundidade(Vertice *inicio)
  * 
  * @param inicio Apontador para a antena de partida.
  * @param numeroAntenas Tamanho do array da lista.
+ * 
  * @return int 0 se for bem-sucedido,
- * @return int -3 se a antena de início for inválida,
- * @return int -8 se a lista auxiliar exceder o tamanho máximo permitido (overflow).
+ * @return int ERRO_ANTENA_INICIO_INVALIDA se a antena de início for inválida,
+ * @return int ERRO_OVERFLOW_LISTA se a lista auxiliar exceder o tamanho máximo permitido (overflow).
  */
 int procurarLargura(Vertice *inicio, int numeroAntenas)
 {
     // Verifica se a antena início é válida
-    if (inicio == NULL) return -3; /* Return -3 caso não seja válida a antena início */
+    if (inicio == NULL) return ERRO_ANTENA_INICIO_INVALIDA;
 
     // Cria a lista e movimentos de lista
     Vertice *lista[numeroAntenas];
@@ -617,7 +751,7 @@ int procurarLargura(Vertice *inicio, int numeroAntenas)
                 // Proteção contra overflow da lista (impossível de acontecer)
                 if (anterior >= numeroAntenas)
                 {
-                    return -8; /* Retorna -8 caso a lista esteja cheia (overflow) */
+                    return ERRO_OVERFLOW_LISTA;
                 }
             }
         }
@@ -636,18 +770,22 @@ int procurarLargura(Vertice *inicio, int numeroAntenas)
  * @param inicio Apontador para a antena de origem.
  * @param destino Apontador para a antena de destino.
  * @param numeroAntenas Número total de antenas, utilizado para definir o tamanho máximo do array de caminho.
+ * 
  * @return int 1 se pelo menos um caminho for encontrado e impresso,  
  * @return int 0 se nenhum caminho for encontrado,  
- * @return int -2 se as antenas de início e fim forem iguais (inválidas),  
- * @return int -3 se a antena de início for inválida (NULL),  
- * @return int -4 se a antena de destino for inválida (NULL).
+ * @return int ERRO_ANTENAS_INICIO_DESTINO_INVALIDAS se as antenas de início e fim forem iguais (inválidas),  
+ * @return int ERRO_ANTENA_INICIO_INVALIDA se a antena de início for inválida (NULL),  
+ * @return int ERRO_ANTENA_DESTINO_INVALIDA se a antena de destino for inválida (NULL).
  */
 int procurarCaminhos(Vertice *inicio, Vertice *destino, int numeroAntenas)
 {
     // Verifica se as antenas de início e destino são válidas
-    if (inicio == destino) return -2; /* Retorna -2 caso sejam ambas inválidas */
-    else if (inicio == NULL) return -3; /* Retorna -3 caso o início seja inválido */
-    else if (destino == NULL) return -4; /* Retorna -4 caso o destino seja inválido */
+    if (inicio == NULL)
+    {
+        if (destino == NULL) return ERRO_ANTENAS_INICIO_DESTINO_INVALIDAS;
+        else return ERRO_ANTENA_INICIO_INVALIDA;
+    }
+    else if (destino == NULL) return ERRO_ANTENA_DESTINO_INVALIDA;
 
     // Array para guardar o caminho atual
     Vertice *caminho[numeroAntenas];
@@ -667,6 +805,7 @@ int procurarCaminhos(Vertice *inicio, Vertice *destino, int numeroAntenas)
  * @param destino Apontador para o vértice de destino (antena a atingir).
  * @param caminho Array de apontadores para armazenar o caminho atual.
  * @param tamanho Tamanho atual do caminho (número de antenas no caminho até agora).
+ * 
  * @return int 1 se pelo menos um caminho for encontrado e impresso,  
  * @return int 0 se nenhum caminho for encontrado a partir deste ramo.
  */
@@ -700,7 +839,6 @@ int procurarCaminhosRecursiva(Vertice *inicio, Vertice *destino, Vertice **camin
                 if (procurarCaminhosRecursiva((*arestaAtual).destino, destino, caminho, tamanho) == 1) imprimiu = 1;
             }
         }
-        
     }
 
     // Dá reset da variável "visitada" para poder procurar outro caminho
@@ -717,18 +855,19 @@ int procurarCaminhosRecursiva(Vertice *inicio, Vertice *destino, Vertice **camin
  * @param cidade Apontador para o grafo que representa a cidade.
  * @param frequencia1 Carácter da primeira frequência a considerar.
  * @param frequencia2 Carácter da segunda frequência a considerar.
- * @return int 1 se forem encontradas e listadas interseções,
- * @return int 0 se não forem encontradas interseções,
- * @return int -1 se o grafo da cidade for inválido,
- * @return int -5 se as duas frequências forem iguais.
+ * 
+ * @return int 1 se forem encontradas e listadas interseções.
+ * @return int 0 se não forem encontradas interseções.
+ * @return int ERRO_CIDADE_PONTEIRO_INVALIDO se o grafo da cidade for inválido.
+ * @return int ERRO_FREQUENCIAS_IGUAIS se as duas frequências forem iguais.
  */
 int listarIntersecoes(Grafo *cidade, char frequencia1, char frequencia2)
 {
     // Verifica se o apontador é válido
-    if (cidade == NULL) return -1; /* Return -1 caso não exista a cidade */
+    if (cidade == NULL) return ERRO_CIDADE_PONTEIRO_INVALIDO;
 
     // Verifica se as frequências são diferentes
-    if (frequencia1 == frequencia2) return -5; /* Return -5 caso as frequências sejam iguais */
+    if (frequencia1 == frequencia2) return ERRO_FREQUENCIAS_IGUAIS;
 
     int imprimiu = 0;
 
@@ -768,12 +907,13 @@ int listarIntersecoes(Grafo *cidade, char frequencia1, char frequencia2)
  * Imprime todas as antenas (vértices) presentes no grafo, incluindo a sua frequência e coordenadas.
  * 
  * @param cidade Apontador para o grafo que representa a cidade.
+ * 
  * @return int 0 se for bem-sucedido, ou -1 se o grafo da cidade for inválido.
  */
 int listarAntenas(Grafo *cidade)
 {
     // Verifica se o apontador é válido
-    if (cidade == NULL) return -1; /* Return -1 caso não exista a cidade */
+    if (cidade == NULL) return ERRO_CIDADE_PONTEIRO_INVALIDO;
 
     // Imprime as antenas
     for (Vertice *atual = (*cidade).primeiraAntena; atual != NULL; atual = (*atual).prox)
@@ -794,12 +934,12 @@ int listarAntenas(Grafo *cidade)
  * 
  * @return int 1 se existirem arestas e forem impressas com sucesso.  
  * @return int 0 se a antena for válida mas não tiver arestas.  
- * @return int -3 se o apontador para a antena for inválido (NULL).
+ * @return int ERRO_ANTENA_INICIO_INVALIDA se o apontador para a antena for inválido (NULL).
  */
 int listarArestasAntena(Vertice *antena)
 {
     // Verifica se o apontador antena é valido
-    if (antena == NULL) return -3; /* Retorna -3 caso a antena seja inválida */
+    if (antena == NULL) return ERRO_ANTENA_INICIO_INVALIDA;
 
     int imprimiu = 0;
 

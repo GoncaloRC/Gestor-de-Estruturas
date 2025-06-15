@@ -15,15 +15,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <unistd.h>
 
-/**
- * @def MAX_X
- * @brief Valor máximo para coordenada X.
- *
- * Este valor define o limite de X (linhas) da cidade
- * onde estão posicionadas as antenas.
- */
-extern const int MAX_X;
+// Lista de Erros
+#define ERRO_CIDADE_PONTEIRO_INVALIDO -1
+#define ERRO_ANTENAS_INICIO_DESTINO_INVALIDAS -2
+#define ERRO_ANTENA_INICIO_INVALIDA -3
+#define ERRO_ANTENA_DESTINO_INVALIDA -4
+#define ERRO_FREQUENCIAS_IGUAIS -5
+#define ERRO_OBJETO_NAO_EXISTE -6
+#define ERRO_OBJETO_JA_EXISTE -7
+#define ERRO_OVERFLOW_LISTA -8
+#define ERRO_ABRIR_FICHEIRO -9
+#define ERRO_ALOCACAO_MEMORIA -404
 
 /**
  * @struct Aresta
@@ -74,25 +78,33 @@ typedef struct Grafo
 } Grafo;
 
 // Declaração das funções
-int libertarEstruturas(Grafo **cidade, int nivelLibertacao);
+Grafo *criarCidade();
+Vertice *criarAntena(char frequencia, int x, int y);
+Aresta *criarAresta(Vertice *destino);
+
+Grafo *libertarCidade(Grafo *cidade);
+int libertarAntenas2(Grafo *cidade);
+int libertarArestas(Grafo *cidade);
+
 int resetVisitados(Grafo *cidade);
 
 int carregarCidade(Grafo *cidade, const char *localizacaoFicheiro);
+
 int interligarAntenas(Grafo *cidade, bool FrequenciasIguais, bool FrequenciasDiferentes, bool verificarRepetidas);
 
-int adicionarCidade(Grafo **novo);
-int adicionarAntenaCidade(Grafo *cidade, char *frequencia, int x, int y);
-int adicionarAntenaCidadeCarregar(Grafo *cidade, Vertice **ultimaAntena, char frequencia, int x, int y);
+int adicionarAntenaOrdenada(Grafo *cidade, char *frequencia, int x, int y);
+Vertice *adicionarAntenaFim(Grafo *cidade, Vertice *ultimaAntena, char frequencia, int x, int y, int *erro);
 int adicionarAresta(Vertice *inicio, Vertice *destino, bool verificarRepetidas);
 
-int removerAntenaCidade(Grafo *cidade, char *frequencia, int x, int y);
+int removerAntena2(Grafo *cidade, char *frequencia, int x, int y);
 int removerAresta(Vertice *inicio, Vertice *destino);
 
-int procurarAntena(Grafo *cidade, Vertice **antena, int x, int y);
+Vertice *procurarAntena(Grafo *cidade, int x, int y, int *erro);
+Aresta *procurarAresta(Vertice *inicio, Vertice *destino, int *erro);
 int procurarProfundidade(Vertice *inicio);
 int procurarLargura(Vertice *inicio, int numeroAntenas);
 int procurarCaminhos(Vertice *inicio, Vertice *destino, int numeroAntenas);
-int procurarCaminhosRecursiva(Vertice *inicio, Vertice *destino, Vertice **caminho, int tamanho);
+int procurarCaminhosRecursiva(Vertice *inicio, Vertice *destino, Vertice **caminho, int tamanho); /* Nunca deve ser chamada, use a "procurarCaminhos" */
 
 int listarIntersecoes(Grafo *cidade, char frequencia1, char frequencia2);
 int listarAntenas(Grafo *cidade);

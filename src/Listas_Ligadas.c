@@ -90,16 +90,12 @@ int libertarNefastos(Nefasto **primeiroNefasto, int *numNefastos)
  * @param inserirNoFim Flag que indica se a antena deve ser inserida no fim da lista.
  * @return 0 Caso a operação seja bem sucedida.
  * @return -1 Caso as coordenadas de X ou Y sejam inválidas.
- * @return -2 Caso o valor de X ultrapasse o valor máximo permitido.
- * @return -3 Caso a antena já exista na posição solicitada.
+ * @return -2 Caso a antena já exista na posição solicitada.
  */
 int adicionarAntena(Antena **primeiraAntena, Antena **ultimaAntena, int *numAntenas, char *frequencia, int x, int y, bool inserirNoFim)
 {
     // Filtra coordenadas negativas
     if (x < 0 || y < 0) return -1; /* Retorna -1 em caso de serem coordenadas negativas */
-
-    // Filtra coordenadas de x acima do permitido
-    if (x > MAX_X) return -2; /* Retorna -2 em caso de ultrapassar o máximo de leitura de X */
 
     // Verifica a posição da nova antena na lista (e se esta é repetida)
     int posicaoNaLista = 0; /* Mais otimizado do que libertar a memória em caso de return -3, mas mais complexo! */
@@ -120,7 +116,7 @@ int adicionarAntena(Antena **primeiraAntena, Antena **ultimaAntena, int *numAnte
         if (x == (*(*primeiraAntena)).x && y == (*(*primeiraAntena)).y)
         {
             *frequencia = (*(*primeiraAntena)).frequencia; /* Guarda a frequência da antena ocupada */
-            return -3; /* Retorna -3 em caso de já existir essa antena */
+            return -2; /* Retorna -2 em caso de já existir essa antena */
         }
         else
         {
@@ -138,7 +134,7 @@ int adicionarAntena(Antena **primeiraAntena, Antena **ultimaAntena, int *numAnte
         if (x == (*anterior).x && y == (*anterior).y)
         {
             *frequencia = (*anterior).frequencia; /* Guarda a frequência da antena ocupada */
-            return -3; /* Retorna -3 em caso de já existir essa antena */
+            return -2; /* Retorna -2 em caso de já existir essa antena */
         }
     }
 
@@ -197,16 +193,12 @@ int adicionarAntena(Antena **primeiraAntena, Antena **ultimaAntena, int *numAnte
  * @param inserirNoFim Flag que indica se o efeito nefasto deve ser inserido no fim da lista.
  * @return 0 Caso a operação seja bem sucedida.
  * @return -1 Caso as coordenadas de X ou Y sejam inválidas.
- * @return -2 Caso o valor de X ultrapasse o valor máximo permitido.
- * @return -3 Caso o efeito nefasto já exista na posição solicitada.
+ * @return -2 Caso o efeito nefasto já exista na posição solicitada.
  */
 int adicionarNefasto(Nefasto **primeiroNefasto, Nefasto **ultimoNefasto, int *numNefastos, int x, int y, bool inserirNoFim)
 {
     // Filtra coordenadas negativas
     if (x < 0 || y < 0) return -1; /* Retorna -1 em caso de serem coordenadas negativas */
-
-    // Filtra coordenadas de x acima do permitido
-    if (x > MAX_X) return -2; /* Retorna -2 em caso de ultrapassar o máximo de leitura de X */
     
     // Verifica a posição do novo nefasto na lista (e se este é repetido)
     int posicaoNaLista = 0; /* Mais otimizado do que libertar a memória em caso de return -3, mas mais complexo! */
@@ -226,7 +218,7 @@ int adicionarNefasto(Nefasto **primeiroNefasto, Nefasto **ultimoNefasto, int *nu
     {
         if (x == (*(*primeiroNefasto)).x && y == (*(*primeiroNefasto)).y)
         {
-            return -3; /* Retorna -3 em caso de já existir esse nefasto */
+            return -2; /* Retorna -2 em caso de já existir esse nefasto */
         }
         else
         {
@@ -243,7 +235,7 @@ int adicionarNefasto(Nefasto **primeiroNefasto, Nefasto **ultimoNefasto, int *nu
 
         if (x == (*anterior).x && y == (*anterior).y)
         {
-            return -3; /* Retorna -3 em caso de já existir esse nefasto */
+            return -2; /* Retorna -3 em caso de já existir esse nefasto */
         }
     }
 
@@ -410,15 +402,20 @@ int carregarAntenas(Antena **primeiraAntena, int *numAntenas, const char *locali
     // Verifica se foi possível abrir o ficheiro
     if (ficheiro == NULL) return -1;
 
-    // Verifica a existência de antenas
+    // Variaveis de otimização e retorno de erro
     Antena *ultimaAntena = NULL;
-    char linha[MAX_X]; /* Máximo tamanho da linha para leitura */
 
-    for (int y = 0; fgets(linha, sizeof(linha), ficheiro); y++)
+    // Variáveis necessárias para leitura (getline)
+    char *linha = NULL;
+    size_t tamanho = 0;
+    ssize_t lidos;
+
+    // Percorre o ficheiro e verifica a existência de antenas
+    for (int y = 0; (lidos = getline(&linha, &tamanho, ficheiro)) != -1; y++)
     {
         for (int x = 0; linha[x] != '\n' && linha[x] != '\0'; x++)
         {
-            if ((linha[x] >= 'A' && linha[x] <= 'Z'))
+            if (linha[x] >= 'A' && linha[x] <= 'Z')
             {
                 // Adiciona a nova antena
                 adicionarAntena(primeiraAntena, &ultimaAntena, numAntenas, &linha[x], x, y, true);
@@ -426,8 +423,8 @@ int carregarAntenas(Antena **primeiraAntena, int *numAntenas, const char *locali
         }
     }
 
-    // Fecha os ficheiros
-    fclose(ficheiro);
+    free(linha);
+    fclose(ficheiro); /* Fecha o ficheiro */
 
     return 0; /* Retorna 0 em caso de sucesso */
 }
@@ -454,11 +451,16 @@ int carregarNefastos(Nefasto **primeiroNefasto, int *numNefastos, const char *lo
     // Verifica se foi possível abrir o ficheiro
     if (ficheiro == NULL) return -1;
 
-    // Verifica a existência de efeitos nefastos
+    // Variaveis de otimização e retorno de erro
     Nefasto *ultimoNefasto = NULL;
-    char linha[MAX_X]; /* Máximo tamanho da linha para leitura */
 
-    for (int y = 0; fgets(linha, sizeof(linha), ficheiro); y++)
+    // Variáveis necessárias para leitura (getline)
+    char *linha = NULL;
+    size_t tamanho = 0;
+    ssize_t lidos;
+
+    // Percorre o ficheiro e verifica a existência de antenas
+    for (int y = 0; (lidos = getline(&linha, &tamanho, ficheiro)) != -1; y++)
     {
         for (int x = 0; linha[x] != '\n' && linha[x] != '\0'; x++)
         {
@@ -470,8 +472,8 @@ int carregarNefastos(Nefasto **primeiroNefasto, int *numNefastos, const char *lo
         }
     }
 
-    // Fecha os ficheiros
-    fclose(ficheiro);
+    free(linha);
+    fclose(ficheiro); /* Fecha o ficheiro */
 
     return 0; /* Retorna 0 em caso de sucesso */
 }
