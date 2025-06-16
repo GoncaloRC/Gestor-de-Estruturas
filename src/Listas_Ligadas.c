@@ -405,7 +405,7 @@ int carregarAntenas(Antena **primeiraAntena, int *numAntenas, const char *locali
     // Variaveis de otimização e retorno de erro
     Antena *ultimaAntena = NULL;
 
-    // Variáveis necessárias para leitura (getline)
+    // Variáveis necessárias para leitura (com getline)
     char *linha = NULL;
     size_t tamanho = 0;
     ssize_t lidos;
@@ -413,7 +413,7 @@ int carregarAntenas(Antena **primeiraAntena, int *numAntenas, const char *locali
     // Percorre o ficheiro e verifica a existência de antenas
     for (int y = 0; (lidos = getline(&linha, &tamanho, ficheiro)) != -1; y++)
     {
-        for (int x = 0; linha[x] != '\n' && linha[x] != '\0'; x++)
+        for (int x = 0; x < lidos; x++)
         {
             if (linha[x] >= 'A' && linha[x] <= 'Z')
             {
@@ -454,7 +454,7 @@ int carregarNefastos(Nefasto **primeiroNefasto, int *numNefastos, const char *lo
     // Variaveis de otimização e retorno de erro
     Nefasto *ultimoNefasto = NULL;
 
-    // Variáveis necessárias para leitura (getline)
+    // Variáveis necessárias para leitura (com getline)
     char *linha = NULL;
     size_t tamanho = 0;
     ssize_t lidos;
@@ -462,7 +462,7 @@ int carregarNefastos(Nefasto **primeiroNefasto, int *numNefastos, const char *lo
     // Percorre o ficheiro e verifica a existência de antenas
     for (int y = 0; (lidos = getline(&linha, &tamanho, ficheiro)) != -1; y++)
     {
-        for (int x = 0; linha[x] != '\n' && linha[x] != '\0'; x++)
+        for (int x = 0; x < lidos; x++)
         {
             if (linha[x] == '#')
             {

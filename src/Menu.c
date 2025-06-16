@@ -346,7 +346,7 @@ void menuPrincipal(const char **traducoes)
             break;
 
             case 5:
-                libertarArestas(cidade);
+                libertarAntenas2(cidade);
                 resultado[0] = carregarCidade(cidade, localizacaoFicheiro[2]);
                 if (resultado[0] == ERRO_CIDADE_PONTEIRO_INVALIDO) printf("❌ Cidade inválida.\n");
                 else if (resultado[0] == ERRO_ABRIR_FICHEIRO) printf("❌ Não foi possível abrir o ficheiro: (%s)", localizacaoFicheiro[2]);

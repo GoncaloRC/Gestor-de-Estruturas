@@ -232,7 +232,7 @@ int carregarCidade(Grafo *cidade, const char *localizacaoFicheiro)
     Vertice *ultimaAntena = NULL;
     int erro;
 
-    // Variáveis necessárias para leitura (getline)
+    // Variáveis necessárias para leitura (com getline)
     char *linha = NULL;
     size_t tamanho = 0;
     ssize_t lidos;
@@ -240,7 +240,7 @@ int carregarCidade(Grafo *cidade, const char *localizacaoFicheiro)
     // Percorre o ficheiro e verifica a existência de antenas
     for (int y = 0; (lidos = getline(&linha, &tamanho, ficheiro)) != -1; y++)
     {
-        for (int x = 0; linha[x] != '\n' && linha[x] != '\0'; x++)
+        for (int x = 0; x < lidos; x++)
         {
             if (linha[x] >= 'A' && linha[x] <= 'Z')
             {
