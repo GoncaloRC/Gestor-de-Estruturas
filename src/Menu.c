@@ -48,24 +48,22 @@ bool lerInteiroSeguro(int *resultado)
 {
     char buffer[12]; // Suficiente para "-2147483648\0"
     
-    if (fgets(buffer, sizeof(buffer), stdin) == NULL) return false;  // Erro na leitura
+    if (fgets(buffer, sizeof(buffer), stdin) == NULL) return false;
 
     // Verifica se o buffer estava cheio e não contém \n
     bool buffer_cheio = !strchr(buffer, '\n');
 
-    // Remove \n e verifica caracteres inválidos
+    // Remove \n se existir
+    char *newline = strchr(buffer, '\n');
+    if (newline) *newline = '\0';
+
+    // Verifica caracteres inválidos
     for (char *p = buffer; *p != '\0'; p++)
     {
-        if (*p == '\n')
+        if (!isdigit((unsigned char)*p) && *p != '-' && *p != '+')
         {
-            *p = '\0';
-            buffer_cheio = false;
-            break;
-        }
-        else if (!isdigit((unsigned char)*p) && *p != '-' && *p != '+')
-        {
-            // Limpa todo o buffer de entrada se houver caracteres inválidos
-            while (getchar() != '\n');
+            // Limpa o buffer se necessário
+            if (buffer_cheio) while (getchar() != '\n');
             return false;
         }
     }
@@ -108,7 +106,7 @@ bool requesitarDados(Grafo *cidade, Dados *dados, int numFrequencias, int numCoo
             {
                 limparEcra();
 
-                if (i > 0 || numFrequencias > 1) printf("Introduza a frequência da %d.ª antena (de A-Z): ", i + 1);
+                if (i > 0 || numFrequencias > 1) printf("Introduza a frequência da %d.ª antena (de A-Z): ", ++i);
                 else printf("Introduza a frequência da antena (de A-Z): ");
                 scanf(" %c", &(*dados).frequencia[i]);
                 getchar();
@@ -127,17 +125,15 @@ bool requesitarDados(Grafo *cidade, Dados *dados, int numFrequencias, int numCoo
             {
                 limparEcra();
 
-                if (i > 0 || numCoordenadas > 1) printf("Introduza a posição X da %d.ª antena: ", i + 1);
+                if (i > 0 || numCoordenadas > 1) printf("Introduza a posição X da %d.ª antena: ", ++i);
                 else printf("Introduza a posição X da antena: ");
-                scanf("%d", &(*dados).x[i]);
-                getchar();
+                if (lerInteiroSeguro(&(*dados).x[i]) == false) (*dados).x[i] = -2147483648;
 
-                if (i > 0 || numCoordenadas > 1) printf("\nIntroduza a posição Y da 1.ª antena: ");
+                if (i > 0 || numCoordenadas > 1) printf("\nIntroduza a posição Y da %d.ª antena: ", ++i);
                 else printf("\nIntroduza a posição Y da antena: ");
-                scanf("%d", &(*dados).y[i]);
-                getchar();
+                if (lerInteiroSeguro(&(*dados).y[i]) == false) (*dados).y[i] = -2147483648;
 
-            } while (&(*dados).x[i] < 0 || &(*dados).y[i] < 0);
+            } while ((*dados).x[i] < -2147483647 || (*dados).y[i] < -2147483647);
 
             if (procurarAntena)
             {
