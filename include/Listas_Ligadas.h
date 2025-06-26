@@ -16,6 +16,15 @@
 #include <stdbool.h>
 #include <unistd.h>
 
+// Lista de Erros
+#define LL_ERRO_REDE_PONTEIRO_INVALIDO -11
+#define LL_ERRO_ANTENA_JA_EXISTE -5
+#define LL_ERRO_ANTENA_NAO_EXISTE -6
+#define LL_ERRO_NEFASTO_JA_EXISTE -17
+#define LL_ERRO_NEFASTO_NAO_EXISTE -18
+#define LL_ERRO_ABRIR_FICHEIRO -100
+#define LL_ERRO_ALOCACAO_MEMORIA -404
+
 /**  
  * @brief Estrutura para representar uma antena  
  * @note Cada antena tem uma frequência (caracter) e coordenadas (x, y) e apontador
@@ -41,18 +50,38 @@ typedef struct Nefasto
 
 } Nefasto;
 
+/**
+ * @brief Estrutura para conter Antenas, Nefastos e número de cada
+ */
+typedef struct Rede
+{
+    Antena *primeiraAntena;
+    int numAntenas;
+    Nefasto *primeiroNefasto;
+    int numNefastos;
+
+} Rede;
+
 // Declaração das funções
-int libertarAntenas(Antena **primeiraAntena, int *numAntenas);
-int libertarNefastos(Nefasto **primeiroNefasto, int *numNefastos);
+Rede *LL_criarRede();
+Antena *LL_criarAntena(char frequencia, int x, int y);
+Nefasto *LL_criarNefasto(int x, int y);
 
-int adicionarAntena(Antena **primeiraAntena, Antena **ultimaAntena, int *numAntenas, char *frequencia, int x, int y, bool inserirNoFim);
-int adicionarNefasto(Nefasto **primeiroNefasto, Nefasto **ultimoNefasto, int *numNefastos, int x, int y, bool inserirNoFim);
+Rede *LL_libertarRede(Rede *rede);
+int LL_libertarAntenas(Rede *rede);
+int LL_libertarNefastos(Rede *rede);
 
-int removerAntena(Antena **primeiraAntena, int *numAntenas, char *frequencia, int x, int y);
+int LL_adicionarAntenaOrdenada(Rede *rede, char *frequencia, int x, int y);
+Antena *LL_adicionarAntenaFim(Rede *rede, Antena *ultimaAntena, char frequencia, int x, int y, int *erro);
+int LL_adicionarNefastoOrdenado(Rede *rede, int x, int y);
+Nefasto *LL_adicionarNefastoFim(Rede *rede, Nefasto *ultimoNefasto, int x, int y, int *erro);
 
-int calcularNefastos(Antena *primeiraAntena, Nefasto **primeiroNefasto, int *numNefastos);
+int LL_removerAntena(Rede *rede, char *frequencia, int x, int y);
 
-int carregarAntenas(Antena **primeiraAntena, int *numAntenas, const char *localizacaoFicheiro);
-int carregarNefastos(Nefasto **primeiroNefasto, int *numNefastos, const char *localizacaoFicheiro);
+int LL_calcularNefastos(Rede *rede, bool coordenadasNegativas);
 
-int apresentarTabela(Antena *primeiraAntena, Nefasto *primeiroNefasto, int numAntenas, int numNefastos, const char *traducoes[3]);
+int LL_carregarAntenas(Rede *rede, const char *localizacaoFicheiro);
+int LL_carregarNefastos(Rede *rede, const char *localizacaoFicheiro);
+
+bool LL_apresentarAntenas(Rede *rede);
+bool LL_apresentarNefastos(Rede *rede);

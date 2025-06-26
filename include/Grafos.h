@@ -22,11 +22,12 @@
 #define ERRO_ANTENAS_INICIO_DESTINO_INVALIDAS -2
 #define ERRO_ANTENA_INICIO_INVALIDA -3
 #define ERRO_ANTENA_DESTINO_INVALIDA -4
-#define ERRO_FREQUENCIAS_IGUAIS -5
-#define ERRO_OBJETO_NAO_EXISTE -6
-#define ERRO_OBJETO_JA_EXISTE -7
-#define ERRO_OVERFLOW_LISTA -8
-#define ERRO_ABRIR_FICHEIRO -9
+#define ERRO_ANTENA_JA_EXISTE -5
+#define ERRO_ANTENA_NAO_EXISTE -6
+#define ERRO_ARESTA_JA_EXISTE -7
+#define ERRO_ARESTA_NAO_EXISTE -8
+#define ERRO_OVERFLOW_LISTA -10
+#define ERRO_ABRIR_FICHEIRO -100
 #define ERRO_ALOCACAO_MEMORIA -404
 
 /**
@@ -83,7 +84,7 @@ Vertice *criarAntena(char frequencia, int x, int y);
 Aresta *criarAresta(Vertice *destino);
 
 Grafo *libertarCidade(Grafo *cidade);
-int libertarAntenas2(Grafo *cidade);
+int libertarAntenas(Grafo *cidade);
 int libertarArestas(Grafo *cidade);
 
 int resetVisitados(Grafo *cidade);
@@ -96,7 +97,7 @@ int adicionarAntenaOrdenada(Grafo *cidade, char *frequencia, int x, int y);
 Vertice *adicionarAntenaFim(Grafo *cidade, Vertice *ultimaAntena, char frequencia, int x, int y, int *erro);
 int adicionarAresta(Vertice *inicio, Vertice *destino, bool verificarRepetidas);
 
-int removerAntena2(Grafo *cidade, char *frequencia, int x, int y);
+int removerAntena(Grafo *cidade, char *frequencia, int x, int y);
 int removerAresta(Vertice *inicio, Vertice *destino);
 
 Vertice *procurarAntena(Grafo *cidade, int x, int y, int *erro);

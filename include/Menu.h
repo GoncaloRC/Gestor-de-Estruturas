@@ -31,24 +31,26 @@
  */
 #define MAX_CAMINHO 128
 
-/**
- * @struct TabelaIdioma
- * @brief Estrutura que representa uma tabela de traduções por idioma.
- *
- * Esta estrutura contém o nome de um idioma e um conjunto de três traduções
- * correspondentes a esse idioma. Pode ser usada, por exemplo, para apresentar textos
- * da apresentarTabela() em várias línguas.
- *
- */
-typedef struct
-{
-    const char *idioma;
-    const char *traducoes[3];
+#define MAX_QUESTOES 2
+#define MAX_RESULTADOS 2
 
-} TabelaIdioma;
+#define QUESTAO_INTERLIGAR_ANTENAS "Pretende interligar as antenas da cidade com a mesma frequência (s/n)?"
+#define QUESTAO_ADICIONAR_ARESTA_RETORNO "Pretende adicionar a aresta de retorno (s/n)?"
+#define QUESTAO_REMOVER_ARESTA_RETORNO "Pretende remover a aresta de retorno (s/n)?"
+
+typedef struct Dados
+{
+    char frequencia[MAX_QUESTOES];
+    int x[MAX_QUESTOES];
+    int y[MAX_QUESTOES];
+    Vertice *antena[MAX_QUESTOES];
+
+} Dados;
 
 // Declaração das funções
 int limparEcra();
-const char **alterarIdioma(const char *idioma);
-Vertice *procurarAntenaMenu(Grafo *cidade, int x, int y);
-void menuPrincipal(const char **traducoes);
+Vertice *procurarAntenaMenu(Grafo *cidade, Dados *dados, int x, int y);
+bool requesitarDados(Grafo *cidade, Dados *dados, int numFrequencias, int numCoordenadas, bool procurarAntena);
+bool requesitarResposta(const char *questao);
+int imprimirErros(Dados *dados, int resultado);
+void menuPrincipal();

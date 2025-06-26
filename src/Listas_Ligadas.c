@@ -11,34 +11,85 @@
 
 #include "../include/Listas_Ligadas.h"
 
+Rede *LL_criarRede()
+{
+    // Aloca o espaço na memória para a rede (e inicializa as variáveis)
+    return calloc(1, sizeof(Rede));
+}
+
+Antena *LL_criarAntena(char frequencia, int x, int y)
+{
+    // Aloca o espaço na memória para a antena (e inicializa as variáveis)
+    Antena *novaAntena = malloc(sizeof(Antena));
+
+    // Verifica se foi possível alocar a memória
+    if (novaAntena == NULL) return NULL;
+
+    // Popula as variáveis da estrutura
+    (*novaAntena).frequencia = frequencia;
+    (*novaAntena).x = x;
+    (*novaAntena).y = y;
+    (*novaAntena).prox = NULL;    
+
+    return novaAntena;
+}
+
+Nefasto *LL_criarNefasto(int x, int y)
+{
+    // Aloca o espaço na memória para o nefasto (e inicializa as variáveis)
+    Nefasto *novoNefasto = malloc(sizeof(Nefasto));
+
+    // Verifica se foi possível alocar a memória
+    if (novoNefasto == NULL) return NULL;
+
+    // Popula as variáveis da estrutura
+    (*novoNefasto).x = x;
+    (*novoNefasto).y = y;
+    (*novoNefasto).prox = NULL;
+
+    return novoNefasto;
+}
+
+Rede *LL_libertarRede(Rede *rede)
+{
+    // Verifica se o apontador é válido
+    if (rede == NULL) return NULL;
+
+    // Liberta as antenas e os nefastos
+    LL_libertarAntenas(rede);
+    LL_libertarNefastos(rede);
+
+    // Liberta a cidade
+    free(rede);
+
+    return NULL;
+}
+
 /**
  * @brief Liberta a memória ocupada pelas antenas na lista.
  * 
  * Esta função percorre a lista de antenas, libertando a memória de cada antena, e redefine o ponteiro da primeira antena para NULL.
  * 
- * @param primeiraAntena Ponteiro para o início da lista de antenas.
- * @param numAntenas Ponteiro para o número total de antenas.
+ * @param rede Ponteiro para a rede com a lista de antenas.
  * @return 0 Caso a operação seja bem sucedida.
  * @return -1 Caso o apontador seja inválido.
  */
-int libertarAntenas(Antena **primeiraAntena, int *numAntenas)
+int LL_libertarAntenas(Rede *rede)
 {
     // Verifica se o apontador é válido
-    if (*primeiraAntena == NULL) return -1; /* Return -1 caso não exista a primeira antena */
+    if (rede == NULL) return LL_ERRO_REDE_PONTEIRO_INVALIDO;
 
     // Liberta a lista das antenas
-    *numAntenas = 0;
-
-    Antena *antenaAtual = *primeiraAntena;
-
-    while (antenaAtual != NULL)
+    for (Antena *antenaAtual = (*rede).primeiraAntena; antenaAtual != NULL; )
     {
         Antena *temp = antenaAtual;
         antenaAtual = (*antenaAtual).prox;
         free(temp);
     }
 
-    *primeiraAntena = NULL;
+    // Dá reset das variáveis da rede
+    (*rede).primeiraAntena = NULL;
+    (*rede).numAntenas = 0;
 
     return 0;
 }
@@ -48,235 +99,219 @@ int libertarAntenas(Antena **primeiraAntena, int *numAntenas)
  * 
  * Esta função percorre a lista de efeitos nefastos, libertando a memória de cada elemento, e redefine o ponteiro do primeiro efeito nefasto para NULL.
  * 
- * @param primeiroNefasto Ponteiro para o início da lista de efeitos nefastos.
- * @param numNefastos Ponteiro para o número total de efeitos nefastos.
+ * @param rede Ponteiro para a rede com a lista de efeitos nefastos.
  * @return 0 Caso a operação seja bem sucedida.
  * @return -1 Caso o apontador seja inválido.
  */
-int libertarNefastos(Nefasto **primeiroNefasto, int *numNefastos)
+int LL_libertarNefastos(Rede *rede)
 {
     // Verifica se o apontador é válido
-    if (*primeiroNefasto == NULL) return -1; /* Return -1 caso não exista o primeiro nefasto */
+    if (rede == NULL) return LL_ERRO_REDE_PONTEIRO_INVALIDO;
 
     // Liberta a lista dos efeitos nefastos
-    *numNefastos = 0;
-
-    Nefasto *nefastoAtual = *primeiroNefasto;
-
-    while (nefastoAtual != NULL)
+    for (Nefasto *nefastoAtual = (*rede).primeiroNefasto; nefastoAtual != NULL; )
     {
         Nefasto *temp = nefastoAtual;
         nefastoAtual = (*nefastoAtual).prox;
         free(temp);
     }
 
-    *primeiroNefasto = NULL;
+    // Dá reset das variáveis da rede
+    (*rede).primeiroNefasto = NULL;
+    (*rede).numNefastos = 0;
 
     return 0;
 }
 
-/**
- * @brief Adiciona uma nova antena à lista.
- * 
- * Esta função adiciona uma nova antena à lista de antenas, verificando previamente se as coordenadas são válidas e se a antena já existe na posição desejada. 
- * O posicionamento da antena pode ser no início, no meio ou no fim da lista.
- * 
- * @param primeiraAntena Ponteiro para o início da lista de antenas.
- * @param ultimaAntena Ponteiro para o fim da lista de antenas.
- * @param numAntenas Ponteiro para o número total de antenas.
- * @param frequencia Frequência da nova antena.
- * @param x Coordenada X da nova antena.
- * @param y Coordenada Y da nova antena.
- * @param inserirNoFim Flag que indica se a antena deve ser inserida no fim da lista.
- * @return 0 Caso a operação seja bem sucedida.
- * @return -1 Caso as coordenadas de X ou Y sejam inválidas.
- * @return -2 Caso a antena já exista na posição solicitada.
- */
-int adicionarAntena(Antena **primeiraAntena, Antena **ultimaAntena, int *numAntenas, char *frequencia, int x, int y, bool inserirNoFim)
+int LL_adicionarAntenaOrdenada(Rede *rede, char *frequencia, int x, int y)
 {
-    // Filtra coordenadas negativas
-    if (x < 0 || y < 0) return -1; /* Retorna -1 em caso de serem coordenadas negativas */
+    // Verifica se o apontador é válido
+    if (rede == NULL) return LL_ERRO_REDE_PONTEIRO_INVALIDO;
 
-    // Verifica a posição da nova antena na lista (e se esta é repetida)
-    int posicaoNaLista = 0; /* Mais otimizado do que libertar a memória em caso de return -3, mas mais complexo! */
+    // Cria o 1.º apontador para navegar a lista ligada
+    Antena *antenaAtual = (*rede).primeiraAntena;
 
-    Antena *anterior;
-    Antena *posterior = *primeiraAntena;
-
-    if (inserirNoFim == true)
+    // Insere no início da lista
+    if (antenaAtual == NULL || (y < (*antenaAtual).y) || (x <= (*antenaAtual).x && y == (*antenaAtual).y))
     {
-        posicaoNaLista = 1; /* Insere no fim */
-    }
-    else if (posterior == NULL)
-    {
-        posicaoNaLista = 2; /* Insere no início e fim (não existem antenas na lista) */
-    }
-    else if ((y < (*(*primeiraAntena)).y) || (x <= (*(*primeiraAntena)).x && y == (*(*primeiraAntena)).y))
-    {
-        if (x == (*(*primeiraAntena)).x && y == (*(*primeiraAntena)).y)
+        // Verifica se a antena é repetida
+        if (antenaAtual != NULL && x == (*antenaAtual).x && y == (*antenaAtual).y)
         {
-            *frequencia = (*(*primeiraAntena)).frequencia; /* Guarda a frequência da antena ocupada */
-            return -2; /* Retorna -2 em caso de já existir essa antena */
+            *frequencia = (*antenaAtual).frequencia; /* Guarda a frequência da antena ocupada */
+            return LL_ERRO_ANTENA_JA_EXISTE;
         }
-        else
-        {
-            posicaoNaLista = 3; /* Insere no início */
-        }
+
+        // Cria a nova antena e popula as variáveis da estrutura
+        Antena *nova = LL_criarAntena(*frequencia, x, y);
+
+        // Verifica se foi possível alocar a memória
+        if (nova == NULL) return LL_ERRO_ALOCACAO_MEMORIA;
+
+        // Insere a antena na posição correspondente da lista
+        (*nova).prox = (*rede).primeiraAntena;
+        (*rede).primeiraAntena = nova;
     }
+    // Insere no meio e fim da lista
     else
     {
-        while (posterior != NULL && ((y > (*posterior).y) || (x >= (*posterior).x && y == (*posterior).y)))
+        // Cria o 2.º apontador para navegar a lista ligada
+        Antena *antenaAnterior = NULL;
+
+        while (antenaAtual != NULL && ((y > (*antenaAtual).y) || (x > (*antenaAtual).x && y == (*antenaAtual).y)))
         {
-            anterior = posterior;
-            posterior = (*posterior).prox;
+            antenaAnterior = antenaAtual;
+            antenaAtual = (*antenaAtual).prox;
         }
 
-        if (x == (*anterior).x && y == (*anterior).y)
+        if (antenaAtual != NULL && x == (*antenaAtual).x && y == (*antenaAtual).y)
         {
-            *frequencia = (*anterior).frequencia; /* Guarda a frequência da antena ocupada */
-            return -2; /* Retorna -2 em caso de já existir essa antena */
+            *frequencia = (*antenaAtual).frequencia; /* Guarda a frequência da antena ocupada */
+            return LL_ERRO_ANTENA_JA_EXISTE;
         }
+
+        // Aloca o espaço na memória para a nova antena
+        Antena *nova = LL_criarAntena(*frequencia, x, y);
+
+        // Verifica se foi possível alocar a memória
+        if (nova == NULL) return LL_ERRO_ALOCACAO_MEMORIA;
+
+        // Insere a antena na posição correspondente da lista
+        (*antenaAnterior).prox = nova;
+        (*nova).prox = antenaAtual;
     }
 
-    // Cria o espaço na memória para a nova antena e popula as variáveis
-    Antena *nova = malloc(sizeof(Antena));
-    (*nova).frequencia = *frequencia;
-    (*nova).x = x;
-    (*nova).y = y;
-    (*nova).prox = NULL;
-
-    // Insere a antena na posição correspondente
-    if (posicaoNaLista == 0)
-    {
-        (*anterior).prox = nova;
-        (*nova).prox = posterior;
-    }
-    else if (posicaoNaLista == 1)
-    {
-        if (*primeiraAntena == NULL)
-        {
-            *primeiraAntena = nova;
-            *ultimaAntena = nova;
-        }
-        else
-        {
-            (*(*ultimaAntena)).prox = nova;
-            *ultimaAntena = nova;
-        }
-    }
-    if (posicaoNaLista == 2)
-    {
-        *primeiraAntena = nova;
-    }
-    if (posicaoNaLista == 3)
-    {
-        (*nova).prox = *primeiraAntena;
-        *primeiraAntena = nova;
-    }
-
-    (*numAntenas)++;
+    (*rede).numAntenas++;
 
     return 0;
 }
 
-/**
- * @brief Adiciona um novo efeito nefasto à lista.
- * 
- * Esta função adiciona um novo efeito nefasto à lista, verificando previamente se as coordenadas são válidas e se o efeito nefasto já existe na posição desejada. 
- * O posicionamento do efeito pode ser no início, no meio ou no fim da lista.
- * 
- * @param primeiroNefasto Ponteiro para o início da lista de efeitos nefastos.
- * @param ultimoNefasto Ponteiro para o fim da lista de efeitos nefastos.
- * @param numNefastos Ponteiro para o número total de efeitos nefastos.
- * @param x Coordenada X do novo efeito nefasto.
- * @param y Coordenada Y do novo efeito nefasto.
- * @param inserirNoFim Flag que indica se o efeito nefasto deve ser inserido no fim da lista.
- * @return 0 Caso a operação seja bem sucedida.
- * @return -1 Caso as coordenadas de X ou Y sejam inválidas.
- * @return -2 Caso o efeito nefasto já exista na posição solicitada.
- */
-int adicionarNefasto(Nefasto **primeiroNefasto, Nefasto **ultimoNefasto, int *numNefastos, int x, int y, bool inserirNoFim)
+Antena *LL_adicionarAntenaFim(Rede *rede, Antena *ultimaAntena, char frequencia, int x, int y, int *erro)
 {
-    // Filtra coordenadas negativas
-    if (x < 0 || y < 0) return -1; /* Retorna -1 em caso de serem coordenadas negativas */
-    
-    // Verifica a posição do novo nefasto na lista (e se este é repetido)
-    int posicaoNaLista = 0; /* Mais otimizado do que libertar a memória em caso de return -3, mas mais complexo! */
-
-    Nefasto *anterior;
-    Nefasto *posterior = *primeiroNefasto;
-
-    if (inserirNoFim == true)
+    // Verifica se o apontador é válido
+    if (rede == NULL)
     {
-        posicaoNaLista = 1; /* Insere no fim */
+        *erro = LL_ERRO_REDE_PONTEIRO_INVALIDO;
+        return NULL;
     }
-    else if (posterior == NULL)
+
+    // Cria o espaço na memória para a nova antena
+    Antena *nova = LL_criarAntena(frequencia, x, y);
+
+    // Verifica se foi possível alocar a memória
+    if (nova == NULL)
     {
-        posicaoNaLista = 2; /* Insere no início e fim (não existem nefastos na lista) */
+        *erro = LL_ERRO_ALOCACAO_MEMORIA;
+        return NULL;
     }
-    else if ((y < (*(*primeiroNefasto)).y) || (x <= (*(*primeiroNefasto)).x && y == (*(*primeiroNefasto)).y))
+
+    // Adiciona na posição correta da lista
+    if ((*rede).primeiraAntena == NULL)
     {
-        if (x == (*(*primeiroNefasto)).x && y == (*(*primeiroNefasto)).y)
-        {
-            return -2; /* Retorna -2 em caso de já existir esse nefasto */
-        }
-        else
-        {
-            posicaoNaLista = 3; /* Insere no início */
-        }
+        (*rede).primeiraAntena = nova;
+        ultimaAntena = nova;
     }
     else
     {
-        while (posterior != NULL && ((y > (*posterior).y) || (x >= (*posterior).x && y == (*posterior).y)))
-        {
-            anterior = posterior;
-            posterior = (*posterior).prox;
-        }
-
-        if (x == (*anterior).x && y == (*anterior).y)
-        {
-            return -2; /* Retorna -3 em caso de já existir esse nefasto */
-        }
+        (*ultimaAntena).prox = nova;
+        ultimaAntena = nova;
     }
 
-    // Cria o espaço na memória para a nova nefasto e popula as variáveis
-    Nefasto *novo = malloc(sizeof(Nefasto));
-    (*novo).x = x;
-    (*novo).y = y;
-    (*novo).prox = NULL;
+    // Incrementa o número de antenas
+    (*rede).numAntenas++;
 
-    // Insere a antena na posição correspondente
-    if (posicaoNaLista == 0)
+    return nova;
+}
+
+int LL_adicionarNefastoOrdenado(Rede *rede, int x, int y)
+{
+    // Verifica se o apontador é válido
+    if (rede == NULL) return LL_ERRO_REDE_PONTEIRO_INVALIDO;
+
+    // Cria o 1.º apontador para navegar a lista ligada
+    Nefasto *nefastoAtual = (*rede).primeiroNefasto;
+
+    // Insere no início da lista
+    if (nefastoAtual == NULL || (y < (*nefastoAtual).y) || (x <= (*nefastoAtual).x && y == (*nefastoAtual).y))
     {
-        (*anterior).prox = novo;
-        (*novo).prox = posterior;
+        // Verifica se o nefasto é repetido
+        if (nefastoAtual != NULL && x == (*nefastoAtual).x && y == (*nefastoAtual).y) return LL_ERRO_NEFASTO_JA_EXISTE;
+
+        // Cria o novo nefasto e popula as variáveis da estrutura
+        Nefasto *novo = LL_criarNefasto(x, y);
+
+        // Verifica se foi possível alocar a memória
+        if (novo == NULL) return LL_ERRO_ALOCACAO_MEMORIA;
+
+        // Insere o nefasto na posição correspondente da lista
+        (*novo).prox = (*rede).primeiroNefasto;
+        (*rede).primeiroNefasto = novo;
     }
-    else if (posicaoNaLista == 1)
+    // Insere no meio e fim da lista
+    else
     {
-        if (*primeiroNefasto == NULL)
+        // Cria o 2.º apontador para navegar a lista ligada
+        Nefasto *nefastoAnterior = NULL;
+
+        while (nefastoAtual != NULL && ((y > (*nefastoAtual).y) || (x > (*nefastoAtual).x && y == (*nefastoAtual).y)))
         {
-            *primeiroNefasto = novo;
-            *ultimoNefasto = novo;
+            nefastoAnterior = nefastoAtual;
+            nefastoAtual = (*nefastoAtual).prox;
         }
-        else
-        {
-            (*(*ultimoNefasto)).prox = novo;
-            *ultimoNefasto = novo;
-        }
-    }
-    if (posicaoNaLista == 2)
-    {
-        *primeiroNefasto = novo;
-    }
-    if (posicaoNaLista == 3)
-    {
-        (*novo).prox = *primeiroNefasto;
-        *primeiroNefasto = novo;
+
+        if (nefastoAtual != NULL && x == (*nefastoAtual).x && y == (*nefastoAtual).y) return LL_ERRO_NEFASTO_JA_EXISTE;
+
+        // Aloca o espaço na memória para o novo nefasto
+        Nefasto *novo = LL_criarNefasto(x, y);
+
+        // Verifica se foi possível alocar a memória
+        if (novo == NULL) return LL_ERRO_ALOCACAO_MEMORIA;
+
+        // Insere a antena na posição correspondente da lista
+        (*nefastoAnterior).prox = novo;
+        (*novo).prox = nefastoAtual;
     }
 
-    (*numNefastos)++;
+    // Incrementa o número de nefastos
+    (*rede).numNefastos++;
 
     return 0;
+}
+
+Nefasto *LL_adicionarNefastoFim(Rede *rede, Nefasto *ultimoNefasto, int x, int y, int *erro)
+{
+    // Verifica se o apontador é válido
+    if (rede == NULL)
+    {
+        *erro = LL_ERRO_REDE_PONTEIRO_INVALIDO;
+        return NULL;
+    }
+
+    // Cria o espaço na memória para o novo nefasto
+    Nefasto *novo = LL_criarNefasto(x, y);
+
+    // Verifica se foi possível alocar a memória
+    if (novo == NULL)
+    {
+        *erro = LL_ERRO_ALOCACAO_MEMORIA;
+        return NULL;
+    }
+
+    // Adiciona na posição correta da lista
+    if ((*rede).primeiroNefasto == NULL)
+    {
+        (*rede).primeiroNefasto = novo;
+        ultimoNefasto = novo;
+    }
+    else
+    {
+        (*ultimoNefasto).prox = novo;
+        ultimoNefasto = novo;
+    }
+
+    // Incrementa o número de nefastos
+    (*rede).numNefastos++;
+
+    return novo;
 }
 
 /**
@@ -294,44 +329,44 @@ int adicionarNefasto(Nefasto **primeiroNefasto, Nefasto **ultimoNefasto, int *nu
  * @return Retorna -1 caso não existam antenas.
  * @return Retorna -2 caso a antena não seja encontrada.
  */
-int removerAntena(Antena **primeiraAntena, int *numAntenas, char *frequencia, int x, int y)
+int LL_removerAntena(Rede *rede, char *frequencia, int x, int y)
 {
-    // Verifica se existem antenas na lista
-    if (*numAntenas == 0) return -1;   // Retorna -1 em caso de não existirem antenas na lista
+    // Verifica se o apontador é válido
+    if (rede == NULL) return LL_ERRO_REDE_PONTEIRO_INVALIDO;
 
-    Antena *atual = *primeiraAntena;
-    Antena *anterior = NULL;
+    Antena *antenaAnterior = NULL;
+    Antena *antenaAtual = (*rede).primeiraAntena;
 
-    while (atual != NULL)
+    while (antenaAtual != NULL && y >= (*antenaAtual).y)
     {
         // Verifica se a antena atual é a que queremos remover
-        if ((*atual).x == x && (*atual).y == y)
+        if ((*antenaAtual).x == x && (*antenaAtual).y == y)
         {
-            *frequencia = (*atual).frequencia; /* Guarda a frequência da antena removida */
+            *frequencia = (*antenaAtual).frequencia; /* Guarda a frequência da antena removida */
 
             // Verifica a posição da antena (início ou meio/fim)
-            if (anterior == NULL)
+            if (antenaAnterior == NULL)
             {
-                *primeiraAntena = (*atual).prox;
+                (*rede).primeiraAntena = (*antenaAtual).prox;
             }
             else
             {
-                (*anterior).prox = (*atual).prox;
+                (*antenaAnterior).prox = (*antenaAtual).prox;
             }
 
-            (*numAntenas)--;
+            (*rede).numAntenas--;
 
             // Liberta a memória
-            free(atual);
+            free(antenaAtual);
 
-            return 0;   // Retorna 0 em caso de sucesso
+            return 0;
         }
 
-        anterior = atual;
-        atual = (*atual).prox;
+        antenaAnterior = antenaAtual;
+        antenaAtual = (*antenaAtual).prox;
     }
 
-    return -2;  // Retorna -2 em caso de não existir a antena
+    return LL_ERRO_ANTENA_NAO_EXISTE;
 }
 
 /**
@@ -347,13 +382,13 @@ int removerAntena(Antena **primeiraAntena, int *numAntenas, char *frequencia, in
  * @return Retorna 0 em caso de sucesso (existem nefastos).
  * @return Retorna -1 em caso de não haver nefastos ou nefastos suficientes para calcular (0 - 1).
  */
-int calcularNefastos(Antena *primeiraAntena, Nefasto **primeiroNefasto, int *numNefastos)
+int LL_calcularNefastos(Rede *rede, bool coordenadasNegativas)
 {
-    // Verifica se existem nefastos
-    if (*numNefastos > 0) return -1;
+    // Verifica se o apontador é válido
+    if (rede == NULL) return LL_ERRO_REDE_PONTEIRO_INVALIDO;
 
-    // Percorre todas as combinações de antenas (Bubble Sort)
-    for (Antena *antenaAtual = primeiraAntena; antenaAtual != NULL; antenaAtual = (*antenaAtual).prox)
+    // Percorre todas as combinações de antenas
+    for (Antena *antenaAtual = (*rede).primeiraAntena; antenaAtual != NULL; antenaAtual = (*antenaAtual).prox)
     {
         for (Antena *comparar = (*antenaAtual).prox; comparar != NULL; comparar = (*comparar).prox)
         {
@@ -370,9 +405,15 @@ int calcularNefastos(Antena *primeiraAntena, Nefasto **primeiroNefasto, int *num
                 int nefasto2X = (*comparar).x + distanciaX;
                 int nefasto2Y = (*comparar).y + distanciaY;
 
-                // Adiciona os efeitos nefastos à lista (evitando os duplicados)
-                adicionarNefasto(primeiroNefasto, NULL, numNefastos, nefasto1X, nefasto1Y, false);
-                adicionarNefasto(primeiroNefasto, NULL, numNefastos, nefasto2X, nefasto2Y, false);
+                // Adiciona os efeitos nefastos à lista (evitando os duplicados) e bloqueia coordenadas negativas se "coordenadasNegativas" for "false"
+                if (coordenadasNegativas || (nefasto1X >= 0 && nefasto1Y >= 0))
+                {
+                    if (LL_adicionarNefastoOrdenado(rede, nefasto1X, nefasto1Y) == LL_ERRO_ALOCACAO_MEMORIA) return LL_ERRO_ALOCACAO_MEMORIA;
+                }
+                if (coordenadasNegativas || (nefasto2X >= 0 && nefasto2Y >= 0))
+                {
+                    if (LL_adicionarNefastoOrdenado(rede, nefasto2X, nefasto2Y) == LL_ERRO_ALOCACAO_MEMORIA) return LL_ERRO_ALOCACAO_MEMORIA;
+                }
             }
         }
     }
@@ -394,16 +435,20 @@ int calcularNefastos(Antena *primeiraAntena, Nefasto **primeiroNefasto, int *num
  * @return Retorna 0 em caso de sucesso.
  * @return Retorna -1 caso ocorra um erro ao abrir o ficheiro.
  */
-int carregarAntenas(Antena **primeiraAntena, int *numAntenas, const char *localizacaoFicheiro)
+int LL_carregarAntenas(Rede *rede, const char *localizacaoFicheiro)
 {
+    // Verifica se o apontador é válido
+    if (rede == NULL) return LL_ERRO_REDE_PONTEIRO_INVALIDO;
+
     // Abre o ficheiro para leitura
     FILE *ficheiro = fopen(localizacaoFicheiro, "r");
 
     // Verifica se foi possível abrir o ficheiro
-    if (ficheiro == NULL) return -1;
+    if (ficheiro == NULL) return LL_ERRO_ABRIR_FICHEIRO;
 
     // Variaveis de otimização e retorno de erro
     Antena *ultimaAntena = NULL;
+    int erro;
 
     // Variáveis necessárias para leitura (com getline)
     char *linha = NULL;
@@ -415,10 +460,19 @@ int carregarAntenas(Antena **primeiraAntena, int *numAntenas, const char *locali
     {
         for (int x = 0; x < lidos; x++)
         {
-            if (linha[x] >= 'A' && linha[x] <= 'Z')
+            // Verifica se o caracter é uma letra (com early exit)
+            if (linha[x] >= 'A' && (linha[x] <= 'Z' || (linha[x] >= 'a' && linha[x] <= 'z')))
             {
                 // Adiciona a nova antena
-                adicionarAntena(primeiraAntena, &ultimaAntena, numAntenas, &linha[x], x, y, true);
+                ultimaAntena = LL_adicionarAntenaFim(rede, ultimaAntena, linha[x], x, y, &erro);
+
+                // Verifica se foi possível alocar a memória
+                if (ultimaAntena == NULL)
+                {
+                    free(linha);
+                    fclose(ficheiro);
+                    return erro;
+                }
             }
         }
     }
@@ -443,16 +497,20 @@ int carregarAntenas(Antena **primeiraAntena, int *numAntenas, const char *locali
  * @return Retorna 0 em caso de sucesso.
  * @return Retorna -1 se ocorrer um erro ao abrir o ficheiro.
  */
-int carregarNefastos(Nefasto **primeiroNefasto, int *numNefastos, const char *localizacaoFicheiro)
+int LL_carregarNefastos(Rede *rede, const char *localizacaoFicheiro)
 {
+    // Verifica se o apontador é válido
+    if (rede == NULL) return LL_ERRO_REDE_PONTEIRO_INVALIDO;
+
     // Abre o ficheiro para leitura
     FILE *ficheiro = fopen(localizacaoFicheiro, "r");
 
     // Verifica se foi possível abrir o ficheiro
-    if (ficheiro == NULL) return -1;
+    if (ficheiro == NULL) return LL_ERRO_ABRIR_FICHEIRO;
 
     // Variaveis de otimização e retorno de erro
     Nefasto *ultimoNefasto = NULL;
+    int erro;
 
     // Variáveis necessárias para leitura (com getline)
     char *linha = NULL;
@@ -467,7 +525,15 @@ int carregarNefastos(Nefasto **primeiroNefasto, int *numNefastos, const char *lo
             if (linha[x] == '#')
             {
                 // Cria um novo nefasto
-                adicionarNefasto(primeiroNefasto, &ultimoNefasto, numNefastos, x, y, true);
+                ultimoNefasto = LL_adicionarNefastoFim(rede, ultimoNefasto, x, y, &erro);
+
+                // Verifica se foi possível alocar a memória
+                if (ultimoNefasto == NULL)
+                {
+                    free(linha);
+                    fclose(ficheiro);
+                    return erro;
+                }
             }
         }
     }
@@ -479,79 +545,92 @@ int carregarNefastos(Nefasto **primeiroNefasto, int *numNefastos, const char *lo
 }
 
 /**
- * @brief Apresenta as tabelas com informações das antenas e dos efeitos nefastos.
+ * @brief Apresenta uma tabela com informações das antenas.
  * 
- * Esta função apresenta duas tabelas: uma com as antenas e as suas localizações (x, y), e outra com os efeitos 
- * nefastos e as suas localizações (x, y). As tabelas são formatadas e apresentadas no terminal.
+ * Esta função apresenta uma tabela com as antenas e as suas localizações (x, y).
+ * As tabelas são formatadas e apresentadas no terminal.
  * 
- * @param primeiraAntena Ponteiro para a primeira antena da lista.
- * @param primeiroNefasto Ponteiro para o primeiro efeito nefasto da lista.
- * @param numAntenas Número de antenas na lista.
- * @param numNefastos Número de efeitos nefastos na lista.
- * @param traducoes Array de strings com as traduções para os títulos das tabelas.
+ * @param rede Ponteiro para a estrutura que contem a primeira antena da lista e o número de antenas.
  * 
- * @return Retorna o número de tabelas que foram impressas com valores (0-2).
+ * @return bool "true" caso tenha imprimido antenas.
+ * @return bool "false" caso tenha imprimido uma tabela vazia.
  */
-int apresentarTabela(Antena *primeiraAntena, Nefasto *primeiroNefasto, int numAntenas, int numNefastos, const char *traducoes[3])
+bool LL_apresentarAntenas(Rede *rede)
 {
-    int impressoes = 0;
+    // Verifica se o apontador é válido
+    if (rede == NULL) return LL_ERRO_REDE_PONTEIRO_INVALIDO;
 
     // Imprime a tabela das antenas
-    printf("%s (%d):\n", traducoes[0], numAntenas);
+    printf("----------------------------------------");
+    printf("\n| 📶         | X          | Y          |");
+    printf("\n----------------------------------------");
 
-    printf("\n--------------------------------------------");
-    printf("\n| %-15s | X          | Y          |", traducoes[1]);
-    printf("\n--------------------------------------------");
-
-    if (numAntenas > 0)
+    if ((*rede).numAntenas > 0)
     {
-        Antena *atual = primeiraAntena;
+        Antena *antenaAtual = (*rede).primeiraAntena;
 
-        while (atual != NULL)
+        while (antenaAtual != NULL)
         {
-            printf("\n| %-15c| %-11d| %-11d|",
-                (*atual).frequencia,
-                (*atual).x,
-                (*atual).y);
-            atual = (*atual).prox;
+            printf("\n| %-11c| %-11d| %-11d|",
+                (*antenaAtual).frequencia,
+                (*antenaAtual).x,
+                (*antenaAtual).y);
+            antenaAtual = (*antenaAtual).prox;
         }
+        printf("\n----------------------------------------");
 
-        impressoes++;
+        return true;
     }
     else
     {
-        printf("\n|                |            |            |");
+        printf("\n|            |            |            |");
+        printf("\n----------------------------------------");
+
+        return false;
     }
-        
-    printf("\n--------------------------------------------");
+}
+
+/**
+ * @brief Apresenta uma tabela com informações dos efeitos nefastos.
+ * 
+ * Esta função apresenta uma tabela com os efeitos nefastos e as suas localizações (x, y).
+ * As tabelas são formatadas e apresentadas no terminal.
+ * 
+ * @param rede Ponteiro para a estrutura que contem o primeiro nefasto da lista e o número de nefastos.
+ * 
+ * @return bool "true" caso tenha imprimido antenas.
+ * @return bool "false" caso tenha imprimido uma tabela vazia.
+ */
+bool LL_apresentarNefastos(Rede *rede)
+{
+    // Verifica se o apontador é válido
+    if (rede == NULL) return LL_ERRO_REDE_PONTEIRO_INVALIDO;
 
     // Imprime a tabela das localizações nefastas
-    printf("\n\n%s (%d):\n", traducoes[2], numNefastos);
-
-    printf("\n---------------------------");
+    printf("---------------------------");
     printf("\n| X          | Y          |");
     printf("\n---------------------------");
 
-    if (numNefastos > 0)
+    if ((*rede).numNefastos > 0)
     {
-        Nefasto *atual = primeiroNefasto;
+        Nefasto *nefastoAtual = (*rede).primeiroNefasto;
 
-        while (atual != NULL)
+        while (nefastoAtual != NULL)
         {
             printf("\n| %-11d| %-11d|",
-                (*atual).x,
-                (*atual).y);
-            atual = (*atual).prox;
+                (*nefastoAtual).x,
+                (*nefastoAtual).y);
+            nefastoAtual = (*nefastoAtual).prox;
         }
+        printf("\n---------------------------");
 
-        impressoes++;
+        return true;
     }
     else
     {
         printf("\n|            |            |");
-    }
+        printf("\n---------------------------");
 
-    printf("\n---------------------------");
-
-    return impressoes; /* Retorna o número de tabelas com valores imprimidas */
+        return false;
+    }    
 }
