@@ -11,12 +11,33 @@
 
 #include "../include/Listas_Ligadas.h"
 
+/**
+ * @brief Cria e inicializa uma nova rede na memória.
+ * 
+ * Esta função aloca memória para uma estrutura do tipo Rede e inicializa todos os seus campos.
+ * 
+ * @return Apontador para a rede criada.
+ * @return NULL em caso de falha na alocação de memória.
+ */
 Rede *LL_criarRede()
 {
     // Aloca o espaço na memória para a rede (e inicializa as variáveis)
     return calloc(1, sizeof(Rede));
 }
 
+/**
+ * @brief Cria e inicializa uma nova antena na memória.
+ * 
+ * Esta função aloca memória para uma estrutura do tipo Antena e inicializa os seus campos
+ * com os valores fornecidos.
+ * 
+ * @param frequencia A frequência de operação da antena.
+ * @param x A coordenada x da antena.
+ * @param y A coordenada y da antena.
+ * 
+ * @return Apontador para a antena criada.
+ * @return NULL em caso de falha na alocação de memória.
+ */
 Antena *LL_criarAntena(char frequencia, int x, int y)
 {
     // Aloca o espaço na memória para a antena (e inicializa as variáveis)
@@ -34,6 +55,18 @@ Antena *LL_criarAntena(char frequencia, int x, int y)
     return novaAntena;
 }
 
+/**
+ * @brief Cria e inicializa um novo nefasto na memória.
+ * 
+ * Esta função aloca memória para uma estrutura do tipo Nefasto e inicializa os seus campos
+ * com os valores fornecidos.
+ * 
+ * @param x A coordenada x do nefasto.
+ * @param y A coordenada y do nefasto.
+ * 
+ * @return Apontador para o nefasto criado.
+ * @return NULL em caso de falha na alocação de memória.
+ */
 Nefasto *LL_criarNefasto(int x, int y)
 {
     // Aloca o espaço na memória para o nefasto (e inicializa as variáveis)
@@ -50,6 +83,15 @@ Nefasto *LL_criarNefasto(int x, int y)
     return novoNefasto;
 }
 
+/**
+ * @brief Liberta a memória alocada para uma rede e todos os seus elementos.
+ * 
+ * Esta função liberta a memória alocada para as antenas, nefastos e finalmente para a própria rede.
+ * 
+ * @param rede Apontador para a rede a ser libertada.
+ * 
+ * @return NULL para indicar que a rede foi libertada com sucesso.
+ */
 Rede *LL_libertarRede(Rede *rede)
 {
     // Verifica se o apontador é válido
@@ -71,8 +113,9 @@ Rede *LL_libertarRede(Rede *rede)
  * Esta função percorre a lista de antenas, libertando a memória de cada antena, e redefine o ponteiro da primeira antena para NULL.
  * 
  * @param rede Ponteiro para a rede com a lista de antenas.
+ * 
  * @return 0 Caso a operação seja bem sucedida.
- * @return -1 Caso o apontador seja inválido.
+ * @return "LL_ERRO_REDE_PONTEIRO_INVALIDO" Caso o apontador seja inválido.
  */
 int LL_libertarAntenas(Rede *rede)
 {
@@ -100,8 +143,9 @@ int LL_libertarAntenas(Rede *rede)
  * Esta função percorre a lista de efeitos nefastos, libertando a memória de cada elemento, e redefine o ponteiro do primeiro efeito nefasto para NULL.
  * 
  * @param rede Ponteiro para a rede com a lista de efeitos nefastos.
+ * 
  * @return 0 Caso a operação seja bem sucedida.
- * @return -1 Caso o apontador seja inválido.
+ * @return "LL_ERRO_REDE_PONTEIRO_INVALIDO" Caso o apontador seja inválido.
  */
 int LL_libertarNefastos(Rede *rede)
 {
@@ -123,6 +167,23 @@ int LL_libertarNefastos(Rede *rede)
     return 0;
 }
 
+/**
+ * @brief Adiciona uma nova antena à rede de forma ordenada
+ * 
+ * Insere uma nova antena na lista ligada de antenas, mantendo a ordenação por coordenadas (y crescente, x crescente para y igual).
+ * Verifica se já existe uma antena nas mesmas coordenadas antes de inserir.
+ * 
+ * @param rede Ponteiro para a estrutura da rede
+ * @param frequencia Ponteiro para a frequência da antena (recebe a frequência existente se a antena já existir)
+ * @param x Coordenada x da nova antena
+ * @param y Coordenada y da nova antena
+ * 
+ * @return Código de erro:
+ * @return 0 em caso de sucesso
+ * @return "LL_ERRO_REDE_PONTEIRO_INVALIDO" se o ponteiro da rede for inválido
+ * @return "LL_ERRO_ANTENA_JA_EXISTE" se já existir uma antena nas mesmas coordenadas
+ * @return "LL_ERRO_ALOCACAO_MEMORIA" se falhar a alocação de memória
+ */
 int LL_adicionarAntenaOrdenada(Rede *rede, char *frequencia, int x, int y)
 {
     // Verifica se o apontador é válido
@@ -185,6 +246,24 @@ int LL_adicionarAntenaOrdenada(Rede *rede, char *frequencia, int x, int y)
     return 0;
 }
 
+/**
+ * @brief Adiciona uma nova antena no final da lista de antenas
+ * 
+ * Insere uma nova antena no final da lista ligada de antenas, sem verificar ordenação ou duplicados.
+ * 
+ * @param rede Ponteiro para a estrutura da rede
+ * @param ultimaAntena Ponteiro para a última antena da lista (atualizado com a nova antena)
+ * @param frequencia Frequência da nova antena
+ * @param x Coordenada x da nova antena
+ * @param y Coordenada y da nova antena
+ * @param erro Ponteiro para armazenar código de erro:
+ * 
+ * @return 0 em caso de sucesso
+ * @return "LL_ERRO_REDE_PONTEIRO_INVALIDO" se o ponteiro da rede for inválido
+ * @return "LL_ERRO_ALOCACAO_MEMORIA" se falhar a alocação de memória
+ * @return Ponteiro para a nova antena criada.
+ * @return NULL em caso de erro
+ */
 Antena *LL_adicionarAntenaFim(Rede *rede, Antena *ultimaAntena, char frequencia, int x, int y, int *erro)
 {
     // Verifica se o apontador é válido
@@ -222,6 +301,22 @@ Antena *LL_adicionarAntenaFim(Rede *rede, Antena *ultimaAntena, char frequencia,
     return nova;
 }
 
+/**
+ * @brief Adiciona um nefasto à rede de forma ordenada
+ * 
+ * Insere um novo nefasto na lista ligada de nefastos, mantendo a ordenação
+ * por coordenadas (y crescente, x crescente para y igual)
+ * 
+ * @param rede Ponteiro para a estrutura da rede
+ * @param x Coordenada x do nefasto a inserir
+ * @param y Coordenada y do nefasto a inserir
+ * 
+ * @return Código de erro:
+ * @return 0 em caso de sucesso
+ * @return "LL_ERRO_REDE_PONTEIRO_INVALIDO" se rede for NULL
+ * @return "LL_ERRO_NEFASTO_JA_EXISTE" se já existir nefasto com essas coordenadas
+ * @return "LL_ERRO_ALOCACAO_MEMORIA" se falhar a alocação de memória
+ */
 int LL_adicionarNefastoOrdenado(Rede *rede, int x, int y)
 {
     // Verifica se o apontador é válido
@@ -277,6 +372,21 @@ int LL_adicionarNefastoOrdenado(Rede *rede, int x, int y)
     return 0;
 }
 
+/**
+ * @brief Adiciona um nefasto no fim da lista ligada
+ * 
+ * Insere um novo nefasto no final da lista ligada de nefastos,
+ * atualizando o ponteiro para o último elemento
+ * 
+ * @param rede Ponteiro para a estrutura da rede
+ * @param ultimoNefasto Ponteiro para o último nefasto da lista
+ * @param x Coordenada x do nefasto a inserir
+ * @param y Coordenada y do nefasto a inserir
+ * @param erro Ponteiro para variável que receberá o código de erro
+ * 
+ * @return Ponteiro para o novo nefasto inserido.
+ * @return NULL em caso de erro.
+ */
 Nefasto *LL_adicionarNefastoFim(Rede *rede, Nefasto *ultimoNefasto, int x, int y, int *erro)
 {
     // Verifica se o apontador é válido
@@ -315,19 +425,20 @@ Nefasto *LL_adicionarNefastoFim(Rede *rede, Nefasto *ultimoNefasto, int x, int y
 }
 
 /**
- * @brief Remove uma antena da lista de antenas.
+ * @brief Remove uma antena da lista de antenas da rede.
  * 
- * Esta função percorre a lista de antenas para encontrar a antena que deve ser removida com base nas coordenadas.
- * A memória alocada para a antena removida é libertada.
+ * Esta função procura e remove uma antena com as coordenadas especificadas,
+ * libertando a memória alocada para a mesma.
  * 
- * @param primeiraAntena Ponteiro para o ponteiro da primeira antena da lista.
- * @param numAntenas Número atual de antenas na lista. Será decrementado.
- * @param x Coordenada X da antena a ser removida.
- * @param y Coordenada Y da antena a ser removida.
+ * @param rede Ponteiro para a estrutura da rede
+ * @param frequencia Ponteiro para guardar a frequência da antena removida
+ * @param x Coordenada x da antena a remover
+ * @param y Coordenada y da antena a remover
  * 
- * @return Retorna 0 em caso de sucesso.
- * @return Retorna -1 caso não existam antenas.
- * @return Retorna -2 caso a antena não seja encontrada.
+ * @return Código de erro:
+ * @return 0 em caso de sucesso
+ * @return "LL_ERRO_REDE_PONTEIRO_INVALIDO" se rede for NULL
+ * @return "LL_ERRO_ANTENA_NAO_EXISTE" se a antena não for encontrada
  */
 int LL_removerAntena(Rede *rede, char *frequencia, int x, int y)
 {
@@ -370,17 +481,18 @@ int LL_removerAntena(Rede *rede, char *frequencia, int x, int y)
 }
 
 /**
- * @brief Calcula os efeitos nefastos causados pelas antenas.
+ * @brief Calcula e adiciona os efeitos nefastos entre antenas.
  * 
- * Esta função calcula os efeitos nefastos entre antenas com a mesma frequência,
- * com base na distância entre elas, e adiciona esses efeitos à lista de efeitos nefastos.
+ * Identifica pares de antenas com a mesma frequência e calcula as posições
+ * dos efeitos nefastos resultantes, adicionando-os à lista ordenada.
  * 
- * @param primeiraAntena Ponteiro para a primeira antena da lista.
- * @param primeiroNefasto Ponteiro para o ponteiro do primeiro efeito nefasto da lista.
- * @param numNefastos Número atual de efeitos nefastos na lista. Será incrementado.
+ * @param rede Ponteiro para a estrutura da rede
+ * @param coordenadasNegativas Indica se devem ser consideradas coordenadas negativas
  * 
- * @return Retorna 0 em caso de sucesso (existem nefastos).
- * @return Retorna -1 em caso de não haver nefastos ou nefastos suficientes para calcular (0 - 1).
+ * @return Código de erro:
+ * @return 0 em caso de sucesso
+ * @return "LL_ERRO_REDE_PONTEIRO_INVALIDO" se rede for NULL
+ * @return "LL_ERRO_ALOCACAO_MEMORIA" se falhar a alocação de memória
  */
 int LL_calcularNefastos(Rede *rede, bool coordenadasNegativas)
 {
@@ -424,16 +536,17 @@ int LL_calcularNefastos(Rede *rede, bool coordenadasNegativas)
 /**
  * @brief Carrega as antenas a partir de um ficheiro.
  * 
- * Esta função lê um ficheiro de texto contendo informações sobre as antenas e adiciona as antenas à lista, 
- * uma por uma, com base nas coordenadas (x, y) e na frequência.
- * Cada letra no ficheiro é interpretada como uma antena.
+ * Esta função lê um ficheiro de texto contendo informações sobre as antenas e adiciona-as à rede,
+ * uma por uma, com base nas coordenadas (x, y) e na frequência (representada por um caractere).
+ * Cada letra (maiúscula ou minúscula) no ficheiro é interpretada como uma antena.
  * 
- * @param primeiraAntena Ponteiro para o ponteiro da primeira antena da lista.
- * @param numAntenas Número de antenas na lista, que será incrementado.
- * @param localizacaoFicheiro Caminho para o ficheiro que contém as informações das antenas.
+ * @param rede Ponteiro para a estrutura da rede onde serão adicionadas as antenas
+ * @param localizacaoFicheiro Caminho para o ficheiro que contém as informações das antenas
  * 
- * @return Retorna 0 em caso de sucesso.
- * @return Retorna -1 caso ocorra um erro ao abrir o ficheiro.
+ * @return Retorna 0 em caso de sucesso
+ * @return Retorna "LL_ERRO_REDE_PONTEIRO_INVALIDO" se o ponteiro para a rede for inválido
+ * @return Retorna "LL_ERRO_ABRIR_FICHEIRO" se ocorrer um erro ao abrir o ficheiro
+ * @return Retorna "LL_ERRO_ALOCACAO_MEMORIA" se falhar a alocação de memória para uma antena
  */
 int LL_carregarAntenas(Rede *rede, const char *localizacaoFicheiro)
 {
@@ -486,16 +599,17 @@ int LL_carregarAntenas(Rede *rede, const char *localizacaoFicheiro)
 /**
  * @brief Carrega os efeitos nefastos a partir de um ficheiro.
  * 
- * Esta função lê um ficheiro de texto contendo informações sobre os efeitos nefastos e adiciona os efeitos 
- * à lista, um por um, com base nas coordenadas (x, y). Cada símbolo '#' no ficheiro é interpretado como 
- * um efeito nefasto.
+ * Esta função lê um ficheiro de texto contendo informações sobre os efeitos nefastos e adiciona-os
+ * à rede, um por um, com base nas coordenadas (x, y). Cada símbolo '#' no ficheiro é interpretado
+ * como um efeito nefasto.
  * 
- * @param primeiroNefasto Ponteiro para o ponteiro do primeiro efeito nefasto da lista.
- * @param numNefastos Número de efeitos nefastos na lista, que será incrementado.
- * @param localizacaoFicheiro Caminho para o ficheiro que contém as informações dos efeitos nefastos.
+ * @param rede Ponteiro para a estrutura da rede onde serão adicionados os efeitos nefastos
+ * @param localizacaoFicheiro Caminho para o ficheiro que contém as informações dos efeitos nefastos
  * 
- * @return Retorna 0 em caso de sucesso.
- * @return Retorna -1 se ocorrer um erro ao abrir o ficheiro.
+ * @return Retorna 0 em caso de sucesso
+ * @return "LL_ERRO_REDE_PONTEIRO_INVALIDO" se o ponteiro para a rede for inválido
+ * @return "LL_ERRO_ABRIR_FICHEIRO" se ocorrer um erro ao abrir o ficheiro
+ * @return "LL_ERRO_ALOCACAO_MEMORIA" se falhar a alocação de memória para um efeito nefasto
  */
 int LL_carregarNefastos(Rede *rede, const char *localizacaoFicheiro)
 {
