@@ -6,6 +6,7 @@ Estruturas de Dados Avançados
 
 ## Alunos
 | Número | Nome             |
+
 | 31537  | Gonçalo Carvalho |
 
 ## organização
